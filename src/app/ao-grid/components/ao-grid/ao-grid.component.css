@@ -1,0 +1,13 @@
+table {
+    border-collapse: collapse;
+}
+
+tbody tr {
+    height: 50px; /* o cualquier otro valor que consideres adecuado */
+}
+thead th, tbody td {
+    width: 100px; /* o cualquier otro valor que consideres adecuado */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

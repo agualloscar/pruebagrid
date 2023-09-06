@@ -1,0 +1,53 @@
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-700 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <ng-container *ngFor="let column of columns">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider relative">
+                        {{ column.caption ? column.caption : column.dataField }}
+                        <button *ngIf="column.showFilter" (click)="column.showFilter = !column.showFilter"
+                            class="absolute top-0 right-0 mt-1 mr-2 text-white">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </th>
+                </ng-container>
+                <!-- Check if there is action content -->
+                <ng-container *ngIf="hasActions">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Acciones
+                    </th>
+                </ng-container>
+            </tr>
+            <tr>
+                <ng-container *ngFor="let column of columns">
+                    <th class="px-6 py-1" *ngIf="column.showFilter">
+                        <input [(ngModel)]="filterModel[column.dataField]" (input)="applyFilter()"
+                            class="p-1 w-full text-black rounded-md" placeholder="Filter..." />
+                    </th>
+                    <th *ngIf="!column.showFilter"></th>
+                </ng-container>
+                <ng-container *ngIf="hasActions">
+                    <th class="px-6 py-1"></th>
+                </ng-container>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of applyFilter()" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <ng-container *ngFor="let column of columns">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <!-- You can expand here with the ngSwitch for various dataTypes -->
+                        {{ item[column.dataField] }}
+                    </td>
+                </ng-container>
+                <!-- Display action content -->
+                <ng-container *ngIf="hasActions">
+                    <td>
+                        <ng-container *ngIf="aoGridActionsTemplate">
+                            <ng-container *ngTemplateOutlet="aoGridActionsTemplate; context: {$implicit: item}"></ng-container>
+                        </ng-container>
+                    </td>
+                </ng-container>
+            </tr>
+        </tbody>
+    </table>
+</div>

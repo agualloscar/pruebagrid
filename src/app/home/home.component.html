@@ -1,0 +1,10 @@
+<ao-grid [dataSource]="myData">
+    <ao-grid-column dataField="id" dataType="number" caption="ID" [showFilter]="true" ></ao-grid-column>
+    <ao-grid-column dataField="name" dataType="string" [showFilter]="true" caption="nombre"></ao-grid-column>
+    <ao-grid-column dataField="email" dataType="string" [showFilter]="true" caption="nombre"></ao-grid-column>
+    <ng-template #aoGridActionsTemplate let-item>
+        <button (click)="editItem(item)" class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
+        <button (click)="deleteItem(item)" class="bg-red-500 text-white px-4 py-2 rounded ml-2">Delete</button>
+    </ng-template>
+  </ao-grid>
+  
