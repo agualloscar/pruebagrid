@@ -12,6 +12,8 @@ export class AOGridComponent implements AfterContentInit  {
   @ContentChild('aoGridActionsTemplate', { static: true }) aoGridActionsTemplate?: TemplateRef<any>;
   @Output() edit: EventEmitter<any> = new EventEmitter();
   @Output() delete: EventEmitter<any> = new EventEmitter();
+
+  @Input() fixedColumns: string[] = [];//fixed column
   
   columns: AOGridColumnComponent[] = [];
   filterModel: { [key: string]: string } = {};
@@ -34,6 +36,7 @@ export class AOGridComponent implements AfterContentInit  {
     } else {
       this.columns = this.projectedColumns.toArray();
     }
+    console.log(this.fixedColumns)
   }
 
   applyFilter() {
