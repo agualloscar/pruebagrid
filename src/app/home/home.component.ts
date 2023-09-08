@@ -14,7 +14,7 @@ export class HomeComponent implements OnInit{
   constructor( private http: HttpClient){}
   ngOnInit(): void {
     //this.articulos=this.generateData();
-    this.myData=this.generateDataProducts(100);
+    this.myData=this.generateDataProducts(1000);
     //console.log(this.myData)
   }
 
@@ -57,10 +57,7 @@ generateDataProducts(count: number) {
           id: i + 1,
           name: this.generateRandomString(5) + " " + this.generateRandomString(7),
           age: Math.floor(Math.random() * 40) + 20,
-          email: this.generateRandomString(10) + "@example.com",
-          adress:'234234234 23423525 2352345245 235243543543 asdad asdasdasd ',
-          tel:'668348345345',
-          country:'adasdasd asdasd asrfas afsas asfras asfas fasfasf asfasf asfsfsfasf'
+          email: this.generateRandomString(10) + "@example.com"
       });
   }
   return records;
@@ -123,6 +120,8 @@ deleteItem(item: any) {
     // Implementa la lógica para eliminar el ítem.
     console.log("Eliminar", item);
     const index=this.myData.findIndex(i=>i.id==item.id);
+    console.log(this.myData)
+    console.log(index)
     if(index>-1)
       this.myData.splice(index,1);
 }

@@ -16,6 +16,10 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     if (changes['itemsToLoad'] && !changes['itemsToLoad'].firstChange) {
       this.displayedItemsCount = this.itemsToLoad;
     }
+    if (changes['dataSource']) {
+      console.log("entri")
+      this.updateDisplayedItems();
+    }
   }
   loadMoreItems(): void {
     this.displayedItemsCount += this.itemsToLoad;
