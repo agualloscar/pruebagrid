@@ -14,7 +14,7 @@ export class HomeComponent implements OnInit{
   constructor( private http: HttpClient){}
   ngOnInit(): void {
     //this.articulos=this.generateData();
-    this.myData=this.generateDataProducts(100000);
+    this.myData=this.generateDataProducts(100);
     //console.log(this.myData)
   }
 
@@ -57,7 +57,10 @@ generateDataProducts(count: number) {
           id: i + 1,
           name: this.generateRandomString(5) + " " + this.generateRandomString(7),
           age: Math.floor(Math.random() * 40) + 20,
-          email: this.generateRandomString(10) + "@example.com"
+          email: this.generateRandomString(10) + "@example.com",
+          adress:'234234234 23423525 2352345245 235243543543 asdad asdasdasd ',
+          tel:'668348345345',
+          country:'adasdasd asdasd asrfas afsas asfras asfas fasfasf asfasf asfsfsfasf'
       });
   }
   return records;
