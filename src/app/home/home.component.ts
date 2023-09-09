@@ -14,7 +14,7 @@ export class HomeComponent implements OnInit{
   constructor( private http: HttpClient){}
   ngOnInit(): void {
     //this.articulos=this.generateData();
-    this.myData=this.generateDataProducts(1000);
+    this.myData=this.generateDataProducts(300);
     //console.log(this.myData)
   }
 

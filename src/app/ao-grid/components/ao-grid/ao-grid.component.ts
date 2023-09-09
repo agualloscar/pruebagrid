@@ -1,5 +1,6 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
+import { faFilter } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'ao-grid',
@@ -7,6 +8,7 @@ import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.componen
   styleUrls: ['./ao-grid.component.css']
 })
 export class AOGridComponent implements AfterContentInit, OnChanges {
+  faFilter=faFilter;
   constructor(private cdRef: ChangeDetectorRef) {}
   //paginacion
   itemsToLoad: number = 25; // Aquí se define el Input con valor por defecto de 25

@@ -5,6 +5,7 @@ import { AOGridColumnComponent } from './components/ao-grid-column/ao-grid-colum
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule} from '@angular/common/http';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 
 
@@ -17,7 +18,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
     CommonModule,
     FormsModule,
     HttpClientModule,
-    InfiniteScrollModule
+    InfiniteScrollModule,
+    FontAwesomeModule
   ],
   exports:[AOGridComponent,AOGridColumnComponent]
 })

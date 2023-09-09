@@ -9,3 +9,30 @@
     background-color: inherit;
 } 
 */
+/* Estilo general para la barra de desplazamiento */
+::-webkit-scrollbar {
+    width: 10px; /* Anchura de la barra vertical */
+    height: 10px; /* Altura de la barra horizontal */
+}
+
+/* Estilo para la pista de la barra */
+::-webkit-scrollbar-track {
+    background: #fff; /* Color de fondo */
+    border-radius: 10px; /* Bordes redondeados */
+}
+
+/* Estilo para el pulgar de la barra */
+::-webkit-scrollbar-thumb {
+    background: rgb(55 65 81);; /* Color de fondo */
+    border-radius: 10px; /* Bordes redondeados */
+}
+
+/* Estilo para el pulgar de la barra al pasar el cursor sobre ella */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Color de fondo al pasar el cursor */
+}
+
+/* Si deseas personalizar los botones de la barra (que por defecto no se muestran) */
+::-webkit-scrollbar-button {
+    display: none; /* Esto oculta los botones, pero puedes darles un diseño si quieres mostrarlos */
+}
