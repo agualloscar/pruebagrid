@@ -1,7 +1,7 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
-import { FixedPosition } from '../../types/types';
+import { FixedColumn, FixedPosition } from '../../types/types';
 
 @Component({
   selector: 'ao-grid',
@@ -78,7 +78,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   @Output() edit: EventEmitter<any> = new EventEmitter();
   @Output() delete: EventEmitter<any> = new EventEmitter();
 
-  @Input() fixedColumns: { dataField: string, position: FixedPosition }[] = [];//fixed column
+  @Input() fixedColumns: FixedColumn[] = [];//fixed column
 
   columns: AOGridColumnComponent[] = [];
   filterModel: { [key: string]: string } = {};
