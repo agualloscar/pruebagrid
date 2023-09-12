@@ -1,0 +1,1 @@
+export type FixedPosition = 'left' | 'right';

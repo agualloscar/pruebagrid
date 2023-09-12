@@ -57,7 +57,10 @@ generateDataProducts(count: number) {
           id: i + 1,
           name: this.generateRandomString(5) + " " + this.generateRandomString(7),
           age: Math.floor(Math.random() * 40) + 20,
-          email: this.generateRandomString(10) + "@example.com"
+          email: this.generateRandomString(10) + "@example.com",
+          address:'asdasdasdasddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+          country:'asdasda asdasgfas asgfasgasgsdagfsdg dsgfsd',
+          year:28
       });
   }
   return records;

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { FixedPosition } from '../../types/types';
 
 @Component({
   selector: 'ao-grid-column',
@@ -10,5 +11,6 @@ export class AOGridColumnComponent {
   @Input() dataType: 'string' | 'number' = 'string';
   @Input() showFilter: boolean = false;
   @Input() caption: string=''; 
-  @Input() fixed: boolean = false;
+  @Input() fixed:FixedPosition |null = null;
+  @Input() width: number = 150;
 }
