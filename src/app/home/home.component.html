@@ -1,18 +1,31 @@
-<ao-grid [dataSource]="myData" [itemsToLoadAtOnce]="25">
-    <ao-grid-column dataField="id" dataType="number" caption="ID" [showFilter]="true" fixed="left" [width]="100"></ao-grid-column>
+<!-- <ao-grid [dataSource]="myData" [itemsToLoadAtOnce]="25">
+    <ao-grid-column dataField="id" dataType="number" caption="ID" [showFilter]="true" fixed="left" [width]="100" headerClass="bg-blue-500"></ao-grid-column>
     <ao-grid-column dataField="name" dataType="string" [showFilter]="true" caption="nombre" fixed="left"></ao-grid-column>
     <ao-grid-column dataField="email" dataType="string" [showFilter]="true" caption="email"></ao-grid-column>
     <ao-grid-column dataField="address" dataType="string" [showFilter]="true" caption="Direccion"></ao-grid-column>
     <ao-grid-column dataField="country" dataType="string" [showFilter]="true" caption="Pais"></ao-grid-column>
     <ao-grid-column dataField="year" dataType="number" [showFilter]="true" caption="Año" fixed="right" [width]="80"></ao-grid-column>
     <ao-grid-column dataField="age" dataType="number" [showFilter]="true" caption="Edad" fixed="right" [width]="80"></ao-grid-column>
+</ao-grid>
+
+<ao-grid [dataSource]="myData" [itemsToLoadAtOnce]="25" [columns]="columnsConfig"></ao-grid> -->
+<div class="flex flex-col items-end">
+    <div class="w-1/4 p-2">
+        <ao-filter 
+            [fields]="['name']"
+            [placeholder]="'Filter by Name...'"
+            (filterChange)="handleFilterChange($event)">
+        </ao-filter>
+    </div>
     
-    
-   
-    <!-- <ng-template #aoGridActionsTemplate let-item>
+    <div class="w-full">
+        <ao-grid [dataSource]="myData" [fixedColumns]="fixedColumnsConfig" [filters]="currentFilters"></ao-grid>
+    </div>
+</div>
+
+<!-- <input type="button" value="Generar" (click)="generaData()" class="button"/> -->
+<!-- <ng-template #aoGridActionsTemplate let-item>
         <button (click)="editItem(item)" class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
         <button (click)="deleteItem(item)" class="bg-red-500 text-white px-4 py-2 rounded ml-2">Delete</button>
     </ng-template> -->
-  </ao-grid>
-
   

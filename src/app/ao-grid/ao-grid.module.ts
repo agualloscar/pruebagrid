@@ -6,13 +6,15 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule} from '@angular/common/http';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { AOFilterComponent } from './components/ao-filter/ao-filter.component';
 
 
 
 @NgModule({
   declarations: [
     AOGridComponent,
-    AOGridColumnComponent
+    AOGridColumnComponent,
+    AOFilterComponent
   ],
   imports: [
     CommonModule,
@@ -21,6 +23,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     InfiniteScrollModule,
     FontAwesomeModule
   ],
-  exports:[AOGridComponent,AOGridColumnComponent]
+  exports:[AOGridComponent,AOGridColumnComponent,AOFilterComponent]
 })
 export class AOGridModule { }

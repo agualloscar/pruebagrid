@@ -36,4 +36,20 @@
 ::-webkit-scrollbar-button {
     display: none; /* Esto oculta los botones, pero puedes darles un diseño si quieres mostrarlos */
 }
+/*diseño loadding*/
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader {
+    border-top-color: #3498db;
+    animation: spin 1.5s linear infinite;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
 
