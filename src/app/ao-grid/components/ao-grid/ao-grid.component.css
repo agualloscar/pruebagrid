@@ -51,5 +51,10 @@
     animation: spin 1.5s linear infinite;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+/*esto es para que no recorra el borde de las columnas fijas*/
+table {
+    border-collapse: separate;
+    border-spacing: 0; /* Ajusta este valor según lo necesites */
+}
 
 

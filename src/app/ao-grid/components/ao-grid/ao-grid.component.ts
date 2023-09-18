@@ -163,6 +163,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     //fin
   }
   ngAfterContentInit() {
+    console.log(this.dataSource)
     this.hasActions = !!this.aoGridActionsTemplate;
     // Si no se han pasado columnas a través del Input
     if (this.columns.length === 0) {
@@ -291,9 +292,9 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       }
       //borde columna fijas
       if (fixedColumn.position === 'left' && column.dataField === this.firstLeftFixedColumnDataField) {
-        styles['border-right'] = '1px solid #000';
+        styles['border-right'] = '1px solid rgba(113,128,150,0.4)';
       } else if (fixedColumn.position === 'right' && column.dataField === this.lastRightFixedColumnDataField) {
-        styles['border-left'] = '1px solid #000';
+        styles['border-left'] = '1px solid rgba(113,128,150,0.4)';
       }
       //fin borde
       return styles;
