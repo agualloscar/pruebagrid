@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { AOGridModule } from './ao-grid/ao-grid.module';
+import { DataService } from './ao-grid/services/data.service';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,7 @@ import { AOGridModule } from './ao-grid/ao-grid.module';
     AppRoutingModule,
     AOGridModule
   ],
-  providers: [],
+  providers: [DataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,19 +1,20 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { IDataService } from "../types/types";
 
 @Injectable()
-export class DataService {
+export class DataService implements IDataService {
   private apiUrl = 'http://localhost:3000/api/personas';
 
   constructor(private http: HttpClient) {}
 
-  fetchData(filters: any, skip: number, take: number): Observable<any[]> {
+  fetchData(offset: number, take: number, filters: string): Observable<any[]> {
     // Aquí construyes los parámetros basados en los filtros y la paginación.
     const params = new HttpParams()
-      .set('skip', skip.toString())
+      .set('offset', offset.toString())
       .set('take', take.toString())
-      .set('filters', JSON.stringify(filters));
+      .set('filters', filters);
 
     return this.http.get<any[]>(this.apiUrl, { params });
   }

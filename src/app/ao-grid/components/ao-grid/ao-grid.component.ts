@@ -1,7 +1,7 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
 import { faFilter, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
-import { FixedColumn, FixedPosition } from '../../types/types';
+import { FixedColumn, FixedPosition, IDataService } from '../../types/types';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -11,16 +11,17 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AOGridComponent implements AfterContentInit, OnChanges {
   faFilter = faFilter;
-  
+
   //paginacion
   itemsToLoad: number = 25; // Aquí se define el Input con valor por defecto de 25
   displayedItems: number = 0;
   displayedItemsCount: number = this.itemsToLoad;
+  skip:number=1;
 
   fixedColumnsSetByInput: boolean = false;  // Añade esta bandera.
   //logica del loadding
   isLoading: boolean = true;
-  ngOnChanges(changes: SimpleChanges) {
+   ngOnChanges(changes: SimpleChanges) {
     if (changes['itemsToLoad'] && !changes['itemsToLoad'].firstChange) {
       this.displayedItemsCount = this.itemsToLoad;
     }
@@ -35,11 +36,12 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     }
     if (changes['fixedColumns']) {
       this.fixedColumnsSetByInput = true;
-      this.calculateColumnOffsets();
+      console.log('fixedIput', this.fixedColumnsSetByInput);
+      //this.calculateColumnOffsets();
     }
     if (changes['filters']) {
       console.log('se mostro los filters en el aogrid')
-      console.log(this.filters)
+       //this.loadMoreData();
     }
   }
   loadMoreItems(): void {
@@ -66,8 +68,8 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     this.itemsToLoad = value || this.itemsToLoad;
   }
 
-  ngAfterViewInit() {
-    this.loadMoreData();
+  async ngAfterViewInit() {
+    await this.loadMoreData();
     this.cdRef.detectChanges();
     this.calculateColumnOffsets();
   }
@@ -83,36 +85,48 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   // }
   async loadMoreData() {
     try {
-      const offset = 1;
+      const offset = this.skip;
       const take = this.itemsToLoad;
-      console.log('offser',offset)
-      console.log('take',take)
+      console.log('este es el offset',offset)
       const filtersString = encodeURIComponent(JSON.stringify(this.filters));
-      const response = await fetch(`http://localhost:3000/api/personas?offset=${offset}&take=${take}&filters=${filtersString}`);
-      
-      if (!response.ok) {
+      const response = await this.dataService?.fetchData(offset,take,filtersString).toPromise();
+      console.log(response)
+      if (!response) {
         throw new Error('Network response was not ok');
       }
-  
-      const newItems = await response.json();
-      console.log(newItems)
+      const newItems = response;
       this.currentItemsToShow = [...this.currentItemsToShow, ...newItems];
       this.displayedItems += newItems.length;
+      this.skip++;
     } catch (error) {
       console.error("Hubo un problema con la operación fetch:", error);
     }
   }
-  
-  onScroll(event: any) {
-    const target = event.target;
-    if (target.offsetHeight + target.scrollTop >= target.scrollHeight) {
-      this.isLoading = true
-      this.loadMoreData();
-      setTimeout(() => {
-        this.isLoading = false;
-      }, 500);
-    }
+  isLoadingMoreData: boolean = false;
+
+  async onScroll(event: any) {
+      const target = event.target;
+      if (!this.isLoadingMoreData && target.offsetHeight + target.scrollTop >= target.scrollHeight) {
+        this.isLoading = true;
+        this.isLoadingMoreData = true; // Establece la bandera a verdadero cuando comienza la carga
+        await this.loadMoreData();
+        setTimeout(() => {
+          this.isLoading = false;
+          this.isLoadingMoreData = false; // Restablece la bandera cuando termina la carga
+        }, 500);
+      }
   }
+  // async onScroll(event: any) {
+  //   const target = event.target;
+  //   if (target.offsetHeight + target.scrollTop >= target.scrollHeight) {
+  //     this.isLoading = true
+  //     await this.loadMoreData();
+  //     setTimeout(() => {
+  //       this.isLoading = false;
+       
+  //     }, 500);
+  //   }
+  // }
   //
   @Input() dataSource: any[] = [];
   @ContentChildren(AOGridColumnComponent) projectedColumns!: QueryList<AOGridColumnComponent>;
@@ -162,9 +176,28 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     }
     //fin
   }
+  @Input() dataService?: IDataService;
   ngAfterContentInit() {
+    const take = this.itemsToLoad;
+    const filtersString = encodeURIComponent(JSON.stringify(this.filters));
+    // Si dataSource no se ha pasado como Input, cargarlo del dataService
+    if (!this.dataSource || this.dataSource.length === 0) {
+      this.dataService?.fetchData(this.skip, take, filtersString).subscribe(data => {
+        this.dataSource = data;
+        this.initializeColumns();
+      });
+    } else {
+      this.initializeColumns();
+    }
+    setTimeout(()=>{
+      this.isLoading=false;
+    },1000)
+    
+  }
+  private initializeColumns() {
     console.log(this.dataSource)
     this.hasActions = !!this.aoGridActionsTemplate;
+
     // Si no se han pasado columnas a través del Input
     if (this.columns.length === 0) {
       // Si se han proyectado columnas a través del contenido
@@ -351,5 +384,5 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   //logica para filtros
   @Input() filters: any = {};
   @Input() apiUrl: string = '';
-  constructor(private cdRef: ChangeDetectorRef,private http: HttpClient) { }
+  constructor(private cdRef: ChangeDetectorRef, private http: HttpClient) { }
 }

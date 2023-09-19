@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid/components/ao-grid-column/ao-grid-column.component';
-import { FixedColumn } from '../ao-grid/types/types';
+import { FixedColumn, IDataService } from '../ao-grid/types/types';
+import { DataService } from '../ao-grid/services/data.service';
 type Articulo = {
   producto: string;
   [date: string]: string | number;
@@ -13,7 +14,12 @@ type Articulo = {
 })
 
 export class HomeComponent implements OnInit {
-  constructor(private http: HttpClient) { }
+  constructor(private dataService:DataService) { }
+  get dataFunction(): IDataService {
+    return {
+      fetchData: this.dataService.fetchData.bind(this.dataService)
+    };
+  }
   ngOnInit(): void {
     //this.articulos=this.generateData();
     this.myData = this.generateDataProducts(10000);
@@ -26,13 +32,7 @@ export class HomeComponent implements OnInit {
     // this.http.post('http://localhost:3000/api/personas',data).subscribe(res=>{
     //     console.log(res);
     // });
-    this.myData.forEach(i => {
-      var data = i;
-      delete data['id'];
-      this.http.post('http://localhost:3000/api/personas', data).subscribe(res => {
-        console.log(res);
-      });
-    });
+   
 
   }
   articulos: Articulo[] = [];

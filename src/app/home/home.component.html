@@ -17,9 +17,8 @@
             (filterChange)="handleFilterChange($event)">
         </ao-filter>
     </div>
-    
     <div class="w-full">
-        <ao-grid [dataSource]="myData" [fixedColumns]="fixedColumnsConfig" [filters]="currentFilters"></ao-grid>
+        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [filters]="currentFilters"></ao-grid>
     </div>
 </div>
 
