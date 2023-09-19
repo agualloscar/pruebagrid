@@ -16,12 +16,16 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   itemsToLoad: number = 25; // Aquí se define el Input con valor por defecto de 25
   displayedItems: number = 0;
   displayedItemsCount: number = this.itemsToLoad;
-  skip:number=1;
+  skip: number = 1;
 
   fixedColumnsSetByInput: boolean = false;  // Añade esta bandera.
   //logica del loadding
   isLoading: boolean = true;
-   ngOnChanges(changes: SimpleChanges) {
+
+  //para rastear si trenia filtros anteriomente
+  previousFilters: any = {};
+
+  async ngOnChanges(changes: SimpleChanges) {
     if (changes['itemsToLoad'] && !changes['itemsToLoad'].firstChange) {
       this.displayedItemsCount = this.itemsToLoad;
     }
@@ -41,7 +45,18 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     }
     if (changes['filters']) {
       console.log('se mostro los filters en el aogrid')
-       //this.loadMoreData();
+      console.log(this.filters)
+      // Comprueba si antes tenías filtros y ahora están vacíos
+      const hadFiltersBefore = Object.keys(this.previousFilters).length !== 0;
+      const hasNoFiltersNow = Object.keys(this.filters).length === 0;
+
+      if (Object.keys(this.filters).length !== 0 || (hadFiltersBefore && hasNoFiltersNow)) {
+        this.hasReachedEndOfData=false;
+        await this.loadMoreDataFilter();
+      }
+
+      // Actualiza previousFilters con el estado actual de los filtros
+      this.previousFilters = { ...this.filters };
     }
   }
   loadMoreItems(): void {
@@ -83,18 +98,54 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   //   this.currentItemsToShow = [...this.currentItemsToShow, ...newItems];
   //   this.displayedItems += newItems.length;
   // }
-  async loadMoreData() {
+  async loadMoreDataFilter() {
     try {
+      this.skip = 1;//esto es porque se reinicia el filter
       const offset = this.skip;
       const take = this.itemsToLoad;
-      console.log('este es el offset',offset)
+      console.log('este es el offset', offset)
       const filtersString = encodeURIComponent(JSON.stringify(this.filters));
-      const response = await this.dataService?.fetchData(offset,take,filtersString).toPromise();
+      const response = await this.dataService?.fetchData(offset, take, filtersString).toPromise();
       console.log(response)
       if (!response) {
         throw new Error('Network response was not ok');
       }
-      const newItems = response;
+      const newItems = response.data;
+      // Si recibimos menos elementos de los esperados, probablemente hemos llegado al final.
+      if (newItems.length < this.itemsToLoad) {
+        this.hasReachedEndOfData = true;
+      }
+      if (this.total !== response.total) {
+        this.total = response.total;
+      }
+      this.total = Number(response.total);
+      this.currentItemsToShow = [...newItems];
+      this.displayedItems += newItems.length;
+      this.skip++;
+    } catch (error) {
+      console.error("Hubo un problema con la operación fetch:", error);
+    }
+  }
+  total!: number;
+  async loadMoreData() {
+    try {
+      const offset = this.skip;
+      const take = this.itemsToLoad;
+      console.log('este es el offset', offset)
+      const filtersString = encodeURIComponent(JSON.stringify(this.filters));
+      const response = await this.dataService?.fetchData(offset, take, filtersString).toPromise();
+      console.log(response)
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
+      const newItems = response.data;
+      // Si recibimos menos elementos de los esperados, probablemente hemos llegado al final.
+      if (newItems.length < this.itemsToLoad) {
+        this.hasReachedEndOfData = true;
+      }
+      if (this.total !== response.total) {
+        this.total = response.total;
+      }
       this.currentItemsToShow = [...this.currentItemsToShow, ...newItems];
       this.displayedItems += newItems.length;
       this.skip++;
@@ -103,18 +154,26 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     }
   }
   isLoadingMoreData: boolean = false;
-
+  previousScrollTop: number = 0;//para manejar el scroll hacia arriba
+  hasReachedEndOfData: boolean = false;//para validar que llego al final y no haga scroll
   async onScroll(event: any) {
-      const target = event.target;
-      if (!this.isLoadingMoreData && target.offsetHeight + target.scrollTop >= target.scrollHeight) {
-        this.isLoading = true;
-        this.isLoadingMoreData = true; // Establece la bandera a verdadero cuando comienza la carga
-        await this.loadMoreData();
-        setTimeout(() => {
-          this.isLoading = false;
-          this.isLoadingMoreData = false; // Restablece la bandera cuando termina la carga
-        }, 500);
-      }
+    const target = event.target;
+
+    // Comprueba si el desplazamiento actual es mayor que el desplazamiento anterior.
+    const isScrollingDown = target.scrollTop > this.previousScrollTop;
+
+    // Actualiza el desplazamiento anterior.
+    this.previousScrollTop = target.scrollTop;
+
+    if (!this.isLoadingMoreData && !this.hasReachedEndOfData && isScrollingDown && target.offsetHeight + target.scrollTop >= target.scrollHeight) {
+      this.isLoading = true;
+      this.isLoadingMoreData = true;
+      await this.loadMoreData();
+      setTimeout(() => {
+        this.isLoading = false;
+        this.isLoadingMoreData = false;
+      }, 500);
+    }
   }
   // async onScroll(event: any) {
   //   const target = event.target;
@@ -123,7 +182,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   //     await this.loadMoreData();
   //     setTimeout(() => {
   //       this.isLoading = false;
-       
+
   //     }, 500);
   //   }
   // }
@@ -183,16 +242,16 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     // Si dataSource no se ha pasado como Input, cargarlo del dataService
     if (!this.dataSource || this.dataSource.length === 0) {
       this.dataService?.fetchData(this.skip, take, filtersString).subscribe(data => {
-        this.dataSource = data;
+        this.dataSource = data.data;
         this.initializeColumns();
       });
     } else {
       this.initializeColumns();
     }
-    setTimeout(()=>{
-      this.isLoading=false;
-    },1000)
-    
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 1000)
+
   }
   private initializeColumns() {
     console.log(this.dataSource)

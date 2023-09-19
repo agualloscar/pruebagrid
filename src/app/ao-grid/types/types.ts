@@ -8,5 +8,5 @@ export interface FixedColumn {
   }
 
   export interface IDataService {
-    fetchData(offset: number, take: number, filters: string): Observable<any[]>;
+    fetchData(offset: number, take: number, filters: string): Observable<any>;
   }
