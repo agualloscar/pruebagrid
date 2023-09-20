@@ -51,7 +51,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       const hasNoFiltersNow = Object.keys(this.filters).length === 0;
 
       if (Object.keys(this.filters).length !== 0 || (hadFiltersBefore && hasNoFiltersNow)) {
-        this.hasReachedEndOfData=false;
+        this.hasReachedEndOfData = false;
         await this.loadMoreDataFilter();
       }
 
