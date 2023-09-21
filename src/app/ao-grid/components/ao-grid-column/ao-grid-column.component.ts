@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FixedPosition } from '../../types/types';
+import { ActionButton, FixedPosition,TextAlign } from '../../types/types';
 
 @Component({
   selector: 'ao-grid-column',
@@ -8,10 +8,13 @@ import { FixedPosition } from '../../types/types';
 })
 export class AOGridColumnComponent {
   @Input() dataField: string = '';
-  @Input() dataType: 'string' | 'number' = 'string';
+  @Input() dataType: 'string' | 'number'|'action' = 'string';
   @Input() showFilter?: boolean = false;
   @Input() caption?: string=''; 
   @Input() fixed?:FixedPosition |null = null;
-  @Input() width?: number = 150;
+  @Input() width?: number;
   @Input() headerClass?: string = ''; // Este es el nuevo input para la clase
+  //para definir una columna como action
+  @Input() actionButtons?: ActionButton[]; // Nota el cambio a un array y el cambio de nombre.
+  @Input() align?: TextAlign = TextAlign.LEFT;
 }

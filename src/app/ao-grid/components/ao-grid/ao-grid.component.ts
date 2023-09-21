@@ -1,7 +1,7 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
 import { faFilter, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
-import { FixedColumn, FixedPosition, IDataService } from '../../types/types';
+import { ActionButton, FixedColumn, FixedPosition, IDataService,TextAlign } from '../../types/types';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AOGridComponent implements AfterContentInit, OnChanges {
   faFilter = faFilter;
-
+  TextAlign=TextAlign;
   //paginacion
   itemsToLoad: number = 25; // Aquí se define el Input con valor por defecto de 25
   displayedItems: number = 0;
@@ -224,15 +224,18 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
 
     // Se concatenan las columnas en el orden correcto.
     this.columns = [...leftColumns, ...middleColumns, ...rightColumns];
+    console.log('columnas derecha',rightColumns)
 
     //borde columna fijas
     if (leftColumns.length > 0) {
-      this.firstLeftFixedColumnDataField = leftColumns[0].dataField;
+      this.firstLeftFixedColumnDataField = leftColumns[leftColumns.length-1].dataField;
     }
 
     if (rightColumns.length > 0) {
-      this.lastRightFixedColumnDataField = rightColumns[rightColumns.length - 1].dataField;
+      this.lastRightFixedColumnDataField = rightColumns[0].dataField;
     }
+    console.log('colmna derecha',this.lastRightFixedColumnDataField)
+    console.log('colmna izquierda',this.firstLeftFixedColumnDataField)
     //fin
   }
   @Input() dataService?: IDataService;
@@ -444,4 +447,9 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   @Input() filters: any = {};
   @Input() apiUrl: string = '';
   constructor(private cdRef: ChangeDetectorRef, private http: HttpClient) { }
+  //fin
+
+  //logica para iconos en actions
+  @Input() actionButtons: ActionButton[] = [];
+
 }

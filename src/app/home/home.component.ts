@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid/components/ao-grid-column/ao-grid-column.component';
-import { FixedColumn, IDataService } from '../ao-grid/types/types';
+import { ActionButton, FixedColumn, IDataService, TextAlign } from '../ao-grid/types/types';
 import { DataService } from '../ao-grid/services/data.service';
+import { faEdit, faTrash,faTable } from '@fortawesome/free-solid-svg-icons';
 type Articulo = {
   producto: string;
   [date: string]: string | number;
@@ -14,7 +15,23 @@ type Articulo = {
 })
 
 export class HomeComponent implements OnInit {
-  constructor(private dataService:DataService) { }
+  constructor(private dataService:DataService) { 
+    this.myActionButtons= [
+      {
+        icon: faEdit,
+        callback: (item) => this.editItem(item),
+        tooltip: 'Editar',
+        btnClass: 'btn-edit'
+      },
+      {
+        icon: faTrash,
+        callback: (item) => this.deleteItem(item),
+        tooltip: 'Eliminar',
+        btnClass: 'btn-delete'
+      },
+      // ... otros botones
+    ];
+  }
   get dataFunction(): IDataService {
     return {
       fetchData: this.dataService.fetchData.bind(this.dataService)
@@ -23,6 +40,84 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     //this.articulos=this.generateData();
     this.myData = this.generateDataProducts(10000);
+    this.myActionButtons= [
+      {
+        icon: faEdit,
+        callback: (item) => this.editItem(item),
+        tooltip: 'Editar',
+        btnClass: 'btn-edit',
+        iconColor:'red'
+      },
+      {
+        icon: faTrash,
+        callback: (item) => this.deleteItem(item),
+        tooltip: 'Eliminar',
+        btnClass: 'btn-delete',
+        iconColor:'green'
+      },
+      {
+        icon: faTable,
+        callback: (item) => this.deleteItem(item),
+        tooltip: 'Eliminar',
+        btnClass: 'btn-delete',
+        iconColor:'blue'
+      }
+      // ... otros botones
+    ];
+    const myActionButtonsH:ActionButton[]= [
+      {
+        icon: faEdit,
+        callback: (item) => this.editItem(item),
+        tooltip: 'Editar',
+        btnClass: 'btn-edit'
+      }
+    ];
+    this.columnsConfig=[
+      // Aquí tus definiciones de columnas
+      
+      {
+        dataField:'eliminar',
+        dataType:'action',
+        caption:'Editar',
+        actionButtons:myActionButtonsH,
+        align:TextAlign.CENTER
+      },
+      {
+        dataField: 'id',
+        dataType: 'number',
+        caption: 'ID',
+        fixed: 'left',
+        headerClass: '',
+        align:TextAlign.RIGHT
+      },
+      {
+        dataField: 'name',
+        dataType: 'string',
+        caption: 'nombre',
+      },
+      {
+        dataField: 'email',
+        dataType: 'string',
+        caption: 'Email',
+      },
+      {
+        dataField: 'address',
+        dataType: 'string',
+        caption: 'Direccion',
+      },
+      {
+        dataField: 'age',
+        dataType: 'number',
+        caption: 'Edad',
+        align:TextAlign.RIGHT
+      },
+      {
+        dataField:'editar',
+        dataType:'action',
+        caption:'Acciones',
+        actionButtons:this.myActionButtons
+      }
+    ];
     //console.log(this.myData)
   }
   generaData() {
@@ -139,39 +234,25 @@ export class HomeComponent implements OnInit {
   deleteItem(item: any) {
     // Implementa la lógica para eliminar el ítem.
     console.log("Eliminar", item);
-    const index = this.myData.findIndex(i => i.id == item.id);
-    console.log(this.myData)
-    console.log(index)
-    if (index > -1)
-      this.myData.splice(index, 1);
   }
   // En el componente padre
-  columnsConfig: AOGridColumnComponent[] = [
-    // Aquí tus definiciones de columnas
-    {
-      dataField: 'id',
-      dataType: 'number',
-      caption: 'ID',
-      showFilter: true,
-      fixed: 'left',
-      width: 100,
-      headerClass: ''
-    },
-    {
-      dataField: 'name',
-      dataType: 'string',
-      caption: 'nombre',
-      showFilter: true,
-      fixed: 'left'
-    }
-  ];
+  columnsConfig: AOGridColumnComponent[]=[];
   fixedColumnsConfig: FixedColumn[] = [
     {
       dataField: 'id',
       position: 'left'
     },
     {
+      dataField: 'eliminar',
+      position: 'left'
+    }
+    ,
+    {
       dataField: 'age',
+      position: 'right',
+    },
+    {
+      dataField: 'editar',
       position: 'right'
     }
   ];
@@ -183,4 +264,7 @@ export class HomeComponent implements OnInit {
   handleFilterChange(newFilters: { [key: string]: string }) {
     this.currentFilters = newFilters;
   }
+
+  //actions buttons
+  myActionButtons!: ActionButton[];
 }

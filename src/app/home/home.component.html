@@ -12,16 +12,15 @@
 <div class="flex flex-col items-end">
     <div class="w-1/4 p-2">
         <ao-filter 
-            [fields]="['name','email']"
+            [fields]="['name','email','id']"
             [placeholder]="'Filter by Name and Email...'"
             (filterChange)="handleFilterChange($event)">
         </ao-filter>
     </div>
     <div class="w-full">
-        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [filters]="currentFilters"></ao-grid>
+        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [columns]="columnsConfig" [filters]="currentFilters"></ao-grid>
     </div>
 </div>
-<span class="inline-block w-4 h-4 rounded-full bg-red-500"></span>
 
 <!-- <input type="button" value="Generar" (click)="generaData()" class="button"/> -->
 <!-- <ng-template #aoGridActionsTemplate let-item>

@@ -12,7 +12,7 @@
                 <tr>
                     <ng-container *ngFor="let column of columns; let idx=index">
                         <th [ngStyle]="getStickyStyleHeader(column)"
-                            class="px-6 py-2 text-left text-xs font-medium text-white uppercase tracking-wider relative bg-gray-700"
+                            class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider relative bg-gray-700"
                             [ngClass]="column.headerClass" (click)="toggleSort(column.dataField)">
                             {{ column.caption ? column.caption : column.dataField }}
                             <button *ngIf="column.showFilter" (click)="column.showFilter = !column.showFilter"
@@ -48,9 +48,30 @@
                     [ngClass]="i % 2 == 0 ? 'bg-gray-100' : 'bg-white'"
                     class="border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-50 text-gray-700 cursor-pointer">
                     <ng-container *ngFor="let column of columns; let idx=index">
-                        <td [ngStyle]="getStickyStyle(column)" [ngClass]="i % 2 == 0 ? 'bg-gray-100' : 'bg-white'"
-                            class="px-6 py-2 whitespace-nowrap">
-                            {{ item[column.dataField] }}
+                        <td [ngStyle]="getStickyStyle(column)"  [ngClass]="{
+                            'bg-gray-100': i % 2 == 0,
+                            'bg-white': i % 2 !== 0,
+                            'text-left': column.align === TextAlign.LEFT,
+                            'text-center': column.align === TextAlign.CENTER,
+                            'text-right': column.align === TextAlign.RIGHT
+                        }"
+                            class="px-3 py-2 whitespace-nowrap">
+
+                            <!-- Si es una columna de acción, renderiza los botones -->
+                            <ng-container *ngIf="column.dataType === 'action' && column.actionButtons">
+                                <ng-container *ngFor="let actionButton of column.actionButtons">
+                                    <button [ngClass]="actionButton.btnClass" (click)="actionButton.callback(item)"
+                                        title="{{actionButton.tooltip}}" class="px-1">
+                                        <fa-icon [icon]="actionButton.icon" [style.color]="actionButton.iconColor"></fa-icon>
+                                    </button>
+                                </ng-container>
+                            </ng-container>
+
+                            <!-- Si no es una columna de acción, muestra el contenido de la columna -->
+                            <ng-container *ngIf="column.dataType !== 'action'">
+                                {{ item[column.dataField] }}
+                            </ng-container>
+
                         </td>
                     </ng-container>
                     <ng-container *ngIf="hasActions">
