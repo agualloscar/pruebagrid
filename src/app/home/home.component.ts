@@ -80,15 +80,31 @@ export class HomeComponent implements OnInit {
         dataType:'action',
         caption:'Editar',
         actionButtons:myActionButtonsH,
-        align:TextAlign.CENTER
+        align:TextAlign.CENTER,
+        headerConfig:{
+          align:TextAlign.CENTER,
+        },
+        width:40
       },
       {
         dataField: 'id',
-        dataType: 'number',
+        dataType: 'tag',
         caption: 'ID',
         fixed: 'left',
         headerClass: '',
-        align:TextAlign.RIGHT
+        align:TextAlign.CENTER,
+        tagConfig: {
+          backgroundColor:(data)=> data.id%2==0?'	rgba(0,100,0,0.7)':'rgba(255,0,0,0.7)',
+          textColor:(data)=> 'white',
+          formatter: (data) => data.id%2==0 ? 'Activo' : 'Inactivo',
+          // width: 60,
+          // height: 60
+        },
+        headerConfig:{
+          align:TextAlign.CENTER,
+          // backgroundColor:'#fff',
+          // textColor:'black'
+        }
       },
       {
         dataField: 'name',
@@ -104,18 +120,24 @@ export class HomeComponent implements OnInit {
         dataField: 'address',
         dataType: 'string',
         caption: 'Direccion',
+        align:TextAlign.CENTER,
       },
       {
         dataField: 'age',
-        dataType: 'number',
+        dataType: 'currency',
         caption: 'Edad',
-        align:TextAlign.RIGHT
+        align:TextAlign.RIGHT,
+        headerConfig:{
+          
+        },
+        width:40
       },
       {
         dataField:'editar',
         dataType:'action',
         caption:'Acciones',
-        actionButtons:this.myActionButtons
+        actionButtons:this.myActionButtons,
+        width:40
       }
     ];
     //console.log(this.myData)

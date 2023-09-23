@@ -1,8 +1,9 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
-import { faFilter, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faSortUp, faSortDown,faArrowDownAZ,faArrowDownZA,faArrowDown19,faArrowDown91 } from '@fortawesome/free-solid-svg-icons';
 import { ActionButton, FixedColumn, FixedPosition, IDataService,TextAlign } from '../../types/types';
 import { HttpClient } from '@angular/common/http';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
   selector: 'ao-grid',
@@ -10,6 +11,12 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./ao-grid.component.css']
 })
 export class AOGridComponent implements AfterContentInit, OnChanges {
+  //flechas de sort
+  faArrowDownAZ=faArrowDownAZ;
+  faArrowDownZA=faArrowDownZA;
+  faArrowDown19=faArrowDown19;
+  faArrowDown91=faArrowDown91;
+  
   faFilter = faFilter;
   TextAlign=TextAlign;
   //paginacion
@@ -383,7 +390,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       if (column.width) {
         styles['width'] = `${column.width}px`;
         styles['min-width'] = `${column.width}px`;
-        styles['max-width'] = `${column.width}px`;
+        // styles['max-width'] = `${column.width}px`;//se comento porque si vieene un dato mas grande no se hara mas grande
       }
       //borde columna fijas
       if (fixedColumn.position === 'left' && column.dataField === this.firstLeftFixedColumnDataField) {
@@ -404,6 +411,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
         'position': 'sticky',
         [fixedColumn.position]: `${this.columnOffsets[column.dataField]}px`,
         'z-index': 40,
+        'min-width':`${column.width}px`,
         'width': `${column.width}px`,
       };
     }
@@ -446,10 +454,17 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   //logica para filtros
   @Input() filters: any = {};
   @Input() apiUrl: string = '';
-  constructor(private cdRef: ChangeDetectorRef, private http: HttpClient) { }
+  constructor(private cdRef: ChangeDetectorRef, private currencyPipe: CurrencyPipe) { }
   //fin
 
   //logica para iconos en actions
   @Input() actionButtons: ActionButton[] = [];
 
+  //logica para el currency
+  formatData(item: any, column: AOGridColumnComponent): string|null {
+    if (column.dataType === 'currency') {
+      return this.currencyPipe.transform(item[column.dataField], column.currencyCode);
+    }
+    return item[column.dataField];
+  }
 }

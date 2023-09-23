@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { AOGridComponent } from './components/ao-grid/ao-grid.component';
 import { AOGridColumnComponent } from './components/ao-grid-column/ao-grid-column.component';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +23,9 @@ import { AOFilterComponent } from './components/ao-filter/ao-filter.component';
     InfiniteScrollModule,
     FontAwesomeModule
   ],
-  exports:[AOGridComponent,AOGridColumnComponent,AOFilterComponent]
+  exports:[AOGridComponent,AOGridColumnComponent,AOFilterComponent],
+  providers:[
+    CurrencyPipe
+  ]
 })
 export class AOGridModule { }

@@ -26,4 +26,22 @@ export interface FixedColumn {
     CENTER = 'CENTER',
     RIGHT = 'RIGHT'
   }
+  //para el formato de la columna tag
+  export interface TagConfig {
+    backgroundColor?: (data: any) => string;
+    textColor?: (data: any) => string;
+    formatter?: (data: any) => string;
+    width?: number;
+    height?: number;
+  }
+
+  // src/app/ao-grid/types/types.ts
+//para configurar el header
+export interface HeaderConfig {
+  align?: TextAlign; // Aquí estamos usando TextAlign
+  backgroundColor?: string;
+  textColor?: string;
+}
+
+  
   

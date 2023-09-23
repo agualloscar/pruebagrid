@@ -7,22 +7,33 @@
     <div class="relative overflow-x-auto custom-scrollbar shadow-md overflow-y-auto h-[600px] sm:rounded-lg"
         (scroll)="onScroll($event)">
         <table #tableElement class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead
-                class="text-xs text-gray-700 uppercase bg-gray-700 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-20">
+            <thead class="text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-20">
                 <tr>
                     <ng-container *ngFor="let column of columns; let idx=index">
                         <th [ngStyle]="getStickyStyleHeader(column)"
-                            class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider relative bg-gray-700"
-                            [ngClass]="column.headerClass" (click)="toggleSort(column.dataField)">
+                            class="pr-3 pl-1 py-3 text-xs font-medium uppercase tracking-wider relative bg-gray-700"
+                            [class.text-left]="column.headerConfig?.align === TextAlign.LEFT"
+                            [class.text-center]="column.headerConfig?.align === TextAlign.CENTER"
+                            [class.text-right]="column.headerConfig?.align === TextAlign.RIGHT"
+                            [style.background-color]="column.headerConfig?.backgroundColor || ''"
+                            [style.color]="column.headerConfig?.textColor || 'white'" [ngClass]="column.headerClass"
+                            (click)="column.dataType !== 'action' && toggleSort(column.dataField)">
                             {{ column.caption ? column.caption : column.dataField }}
-                            <button *ngIf="column.showFilter" (click)="column.showFilter = !column.showFilter"
-                                class="absolute top-0 right-0 mt-1 mr-2 text-white">
+                            <!-- <button *ngIf="column.showFilter" 
+                                    (click)="column.showFilter = !column.showFilter"
+                                    class="absolute top-0 right-0 mt-1 mr-2 text-white">
                                 <fa-icon [icon]="faFilter" class="text-sm"></fa-icon>
-                            </button>
-                            <fa-icon *ngIf="column.dataField === currentSortField"
-                                [icon]="sortAscending ? faSortUp : faSortDown" class="ml-2"></fa-icon>
+                            </button> -->
+                            <!-- Agrega el icono basado en el tipo de dato de la columna -->
+                            <fa-icon *ngIf="column.dataField === currentSortField && (column.dataType === 'number' || column.dataType === 'currency')"
+                                [icon]="sortAscending ?faArrowDown19:faArrowDown91" class="ml-2"></fa-icon>
+
+                            <fa-icon
+                                *ngIf="column.dataField === currentSortField && (column.dataType !== 'number' && column.dataType !== 'currency')"
+                                [icon]="sortAscending ? faArrowDownAZ : faArrowDownZA" class="ml-2"></fa-icon>
                         </th>
                     </ng-container>
+
                     <ng-container *ngIf="hasActions">
                         <th class="px-6 py-1 text-left text-xs font-medium text-white uppercase tracking-wider">
                             Acciones
@@ -30,14 +41,14 @@
                     </ng-container>
                 </tr>
                 <tr>
-                    <ng-container *ngFor="let column of columns; let idx=index">
+                    <!-- <ng-container *ngFor="let column of columns; let idx=index">
                         <th [ngStyle]="getStickyStyle(column)" class="px-6 py-1 bg-gray-700" *ngIf="column.showFilter">
                             <input [(ngModel)]="filterModel[column.dataField]" (input)="applyFilter()"
                                 class="p-1 w-full text-black rounded-md outline-none border-none shadow-none"
                                 placeholder="Filter..." />
                         </th>
                         <th *ngIf="!column.showFilter"></th>
-                    </ng-container>
+                    </ng-container> -->
                     <ng-container *ngIf="hasActions">
                         <th class="px-6 py-1"></th>
                     </ng-container>
@@ -46,34 +57,50 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 <tr *ngFor="let item of currentItemsToShow; let i = index"
                     [ngClass]="i % 2 == 0 ? 'bg-gray-100' : 'bg-white'"
-                    class="border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-50 text-gray-700 cursor-pointer">
+                    class="border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-50 text-gray-700 cursor-auto">
                     <ng-container *ngFor="let column of columns; let idx=index">
-                        <td [ngStyle]="getStickyStyle(column)"  [ngClass]="{
+                        <td [ngStyle]="getStickyStyle(column)" [ngClass]="{
                             'bg-gray-100': i % 2 == 0,
                             'bg-white': i % 2 !== 0,
                             'text-left': column.align === TextAlign.LEFT,
                             'text-center': column.align === TextAlign.CENTER,
-                            'text-right': column.align === TextAlign.RIGHT
-                        }"
-                            class="px-3 py-2 whitespace-nowrap">
+                            'text-right': column.align === TextAlign.RIGHT|| column.dataType==='currency'
+                        }" class="pr-3 pl-1 py-2 whitespace-nowrap">
 
                             <!-- Si es una columna de acción, renderiza los botones -->
                             <ng-container *ngIf="column.dataType === 'action' && column.actionButtons">
                                 <ng-container *ngFor="let actionButton of column.actionButtons">
-                                    <button [ngClass]="actionButton.btnClass" (click)="actionButton.callback(item)"
-                                        title="{{actionButton.tooltip}}" class="px-1">
-                                        <fa-icon [icon]="actionButton.icon" [style.color]="actionButton.iconColor"></fa-icon>
+                                    <button [ngClass]="[actionButton.btnClass,'ripple-button']"
+                                        (click)="actionButton.callback(item)" title="{{actionButton.tooltip}}"
+                                        class="px-1">
+                                        <fa-icon [icon]="actionButton.icon"
+                                            [style.color]="actionButton.iconColor"></fa-icon>
                                     </button>
                                 </ng-container>
                             </ng-container>
 
-                            <!-- Si no es una columna de acción, muestra el contenido de la columna -->
-                            <ng-container *ngIf="column.dataType !== 'action'">
-                                {{ item[column.dataField] }}
+                            <!-- Si es una columna de tipo tag, renderiza la etiqueta -->
+                            <ng-container *ngIf="column.dataType === 'tag' && column.tagConfig">
+                                <span
+                                    [style.background-color]="column.tagConfig.backgroundColor?column.tagConfig.backgroundColor(item):''"
+                                    [style.color]="column.tagConfig.textColor?column.tagConfig.textColor(item):''"
+                                    [style.min-width.px]="60" [style.display]="'flex'"
+                                    [style.width.px]="column.tagConfig.width"
+                                    class="text-sm text-center font-medium mr-2 px-2.5 py-0.5 rounded-l rounded-r-xl justify-center items-center">
+                                    {{ column.tagConfig.formatter ? column.tagConfig.formatter(item) :
+                                    item[column.dataField] }}
+                                </span>
+
+                            </ng-container>
+
+                            <!-- Si no es una columna de acción ni de tipo tag, muestra el contenido de la columna -->
+                            <ng-container *ngIf="column.dataType !== 'action' && column.dataType !== 'tag'">
+                                {{ formatData(item, column) }}
                             </ng-container>
 
                         </td>
                     </ng-container>
+
                     <ng-container *ngIf="hasActions">
                         <td>
                             <ng-container *ngIf="aoGridActionsTemplate">
