@@ -25,7 +25,8 @@
                                 <fa-icon [icon]="faFilter" class="text-sm"></fa-icon>
                             </button> -->
                             <!-- Agrega el icono basado en el tipo de dato de la columna -->
-                            <fa-icon *ngIf="column.dataField === currentSortField && (column.dataType === 'number' || column.dataType === 'currency')"
+                            <fa-icon
+                                *ngIf="column.dataField === currentSortField && (column.dataType === 'number' || column.dataType === 'currency')"
                                 [icon]="sortAscending ?faArrowDown19:faArrowDown91" class="ml-2"></fa-icon>
 
                             <fa-icon
@@ -33,7 +34,6 @@
                                 [icon]="sortAscending ? faArrowDownAZ : faArrowDownZA" class="ml-2"></fa-icon>
                         </th>
                     </ng-container>
-
                     <ng-container *ngIf="hasActions">
                         <th class="px-6 py-1 text-left text-xs font-medium text-white uppercase tracking-wider">
                             Acciones
@@ -53,6 +53,13 @@
                         <th class="px-6 py-1"></th>
                     </ng-container>
                 </tr>
+                <tr *ngIf="isLoading">
+                    <th colspan="100%" class="p-0 relative">
+                        <div class="h-1 bg-gray-200 overflow-hidden">
+                            <div class="bg-blue-500 h-full w-3/4 animate-moveRight"></div>
+                        </div>
+                    </th>
+                </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 <tr *ngFor="let item of currentItemsToShow; let i = index"
@@ -66,7 +73,6 @@
                             'text-center': column.align === TextAlign.CENTER,
                             'text-right': column.align === TextAlign.RIGHT|| column.dataType==='currency'
                         }" class="pr-3 pl-1 py-2 whitespace-nowrap">
-
                             <!-- Si es una columna de acción, renderiza los botones -->
                             <ng-container *ngIf="column.dataType === 'action' && column.actionButtons">
                                 <ng-container *ngFor="let actionButton of column.actionButtons">
@@ -78,7 +84,6 @@
                                     </button>
                                 </ng-container>
                             </ng-container>
-
                             <!-- Si es una columna de tipo tag, renderiza la etiqueta -->
                             <ng-container *ngIf="column.dataType === 'tag' && column.tagConfig">
                                 <span
@@ -90,17 +95,13 @@
                                     {{ column.tagConfig.formatter ? column.tagConfig.formatter(item) :
                                     item[column.dataField] }}
                                 </span>
-
                             </ng-container>
-
                             <!-- Si no es una columna de acción ni de tipo tag, muestra el contenido de la columna -->
                             <ng-container *ngIf="column.dataType !== 'action' && column.dataType !== 'tag'">
                                 {{ formatData(item, column) }}
                             </ng-container>
-
                         </td>
                     </ng-container>
-
                     <ng-container *ngIf="hasActions">
                         <td>
                             <ng-container *ngIf="aoGridActionsTemplate">
