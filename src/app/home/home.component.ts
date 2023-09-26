@@ -109,12 +109,20 @@ export class HomeComponent implements OnInit {
       {
         dataField: 'name',
         dataType: 'string',
-        caption: 'nombre',
+        caption: 'Nombre',
+        excelConfig:{
+          include:true,
+
+        }
       },
       {
         dataField: 'email',
         dataType: 'string',
         caption: 'Email',
+        excelConfig:{
+          include:true,
+          
+        }
       },
       {
         dataField: 'address',
@@ -130,7 +138,11 @@ export class HomeComponent implements OnInit {
         headerConfig:{
           
         },
-        width:40
+        width:40,
+        excelConfig:{
+          include:true,
+          
+        }
       },
       {
         dataField:'editar',

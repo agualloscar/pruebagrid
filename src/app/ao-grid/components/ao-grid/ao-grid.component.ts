@@ -1,9 +1,11 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
-import { faFilter, faSortUp, faSortDown,faArrowDownAZ,faArrowDownZA,faArrowDown19,faArrowDown91 } from '@fortawesome/free-solid-svg-icons';
-import { ActionButton, FixedColumn, FixedPosition, IDataService,TextAlign } from '../../types/types';
+import { faFilter, faSortUp, faSortDown, faArrowDownAZ, faArrowDownZA, faArrowDown19, faArrowDown91 } from '@fortawesome/free-solid-svg-icons';
+import { ActionButton, FixedColumn, FixedPosition, IDataService, TextAlign } from '../../types/types';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
+//para excel
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'ao-grid',
@@ -12,13 +14,13 @@ import { CurrencyPipe } from '@angular/common';
 })
 export class AOGridComponent implements AfterContentInit, OnChanges {
   //flechas de sort
-  faArrowDownAZ=faArrowDownAZ;
-  faArrowDownZA=faArrowDownZA;
-  faArrowDown19=faArrowDown19;
-  faArrowDown91=faArrowDown91;
-  
+  faArrowDownAZ = faArrowDownAZ;
+  faArrowDownZA = faArrowDownZA;
+  faArrowDown19 = faArrowDown19;
+  faArrowDown91 = faArrowDown91;
+
   faFilter = faFilter;
-  TextAlign=TextAlign;
+  TextAlign = TextAlign;
   //paginacion
   itemsToLoad: number = 25; // Aquí se define el Input con valor por defecto de 25
   displayedItems: number = 0;
@@ -231,18 +233,18 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
 
     // Se concatenan las columnas en el orden correcto.
     this.columns = [...leftColumns, ...middleColumns, ...rightColumns];
-    console.log('columnas derecha',rightColumns)
+    console.log('columnas derecha', rightColumns)
 
     //borde columna fijas
     if (leftColumns.length > 0) {
-      this.firstLeftFixedColumnDataField = leftColumns[leftColumns.length-1].dataField;
+      this.firstLeftFixedColumnDataField = leftColumns[leftColumns.length - 1].dataField;
     }
 
     if (rightColumns.length > 0) {
       this.lastRightFixedColumnDataField = rightColumns[0].dataField;
     }
-    console.log('colmna derecha',this.lastRightFixedColumnDataField)
-    console.log('colmna izquierda',this.firstLeftFixedColumnDataField)
+    console.log('colmna derecha', this.lastRightFixedColumnDataField)
+    console.log('colmna izquierda', this.firstLeftFixedColumnDataField)
     //fin
   }
   @Input() dataService?: IDataService;
@@ -411,7 +413,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
         'position': 'sticky',
         [fixedColumn.position]: `${this.columnOffsets[column.dataField]}px`,
         'z-index': 40,
-        'min-width':`${column.width}px`,
+        'min-width': `${column.width}px`,
         'width': `${column.width}px`,
       };
     }
@@ -461,10 +463,81 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   @Input() actionButtons: ActionButton[] = [];
 
   //logica para el currency
-  formatData(item: any, column: AOGridColumnComponent): string|null {
+  formatData(item: any, column: AOGridColumnComponent): string | null {
     if (column.dataType === 'currency') {
       return this.currencyPipe.transform(item[column.dataField], column.currencyCode);
     }
     return item[column.dataField];
   }
+
+  //logica para exportar a excel
+  exportToExcel() {
+    // Obtener columnas que se incluirán en el Excel
+    const columnsToInclude = this.columns.filter(col => col.excelConfig?.include);
+
+    const filteredData = this.currentItemsToShow.map((row) => {
+      const newRow: any = {};
+      columnsToInclude.forEach(col => {
+        newRow[col.excelConfig?.excelHeader ?? col.caption ?? ''] = row[col.dataField];
+      });
+      return newRow;
+    });
+    const buffer = 1.10; // Ajusta este valor según tus necesidades.
+    const colWidths = columnsToInclude.map(col => {
+      let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length; // inicialmente el tamaño del encabezado
+      this.currentItemsToShow.forEach(row => {
+        const cellValue = `${row[col.dataField]}`;
+        if (cellValue && cellValue.length > maxLength) {
+          maxLength = cellValue.length;
+        }
+      });
+      return { wch: Math.ceil(maxLength * buffer) };
+    });
+
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
+
+    // Aplicar las longitudes al objeto de hoja de trabajo
+    ws['!cols'] = colWidths;
+    // const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
+
+    // Crear los encabezados personalizados
+    const headers = columnsToInclude.map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
+    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A1" });
+
+    // Configurar tipo de dato de celdas
+    let colIndex = 0;
+    columnsToInclude.forEach((col) => {
+      // Establece el tipo de dato del encabezado
+      const headerCellRef = XLSX.utils.encode_cell({ r: 0, c: colIndex });
+      ws[headerCellRef].t = 's';  // Encabezado siempre es string
+
+      // Establece el tipo de dato para las celdas de datos basado en la configuración de columna
+      for (let rowIndex = 0; rowIndex < this.currentItemsToShow.length; rowIndex++) {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
+        if (ws[cellRef]) {
+          switch (col.dataType) {
+            case 'string':
+              ws[cellRef].t = 's';
+              break;
+            case 'number':
+            case 'currency':
+              ws[cellRef].t = 'n';
+              break;
+            default:
+              ws[cellRef].t = 's';
+          }
+        }
+      }
+
+      colIndex++;
+    });
+
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'data.xlsx');
+  }
+
+
+
+
 }

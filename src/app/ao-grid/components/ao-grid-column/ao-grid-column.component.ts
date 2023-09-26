@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ActionButton, FixedPosition, HeaderConfig, TagConfig, TextAlign } from '../../types/types';
+import { ActionButton, ExcelConfig, FixedPosition, HeaderConfig, TagConfig, TextAlign } from '../../types/types';
 
 @Component({
   selector: 'ao-grid-column',
@@ -24,4 +24,9 @@ export class AOGridColumnComponent {
   @Input() headerConfig?: HeaderConfig = {
     align: TextAlign.LEFT
   };
+  //configuracion para exportar
+  @Input() excelConfig?: ExcelConfig = {
+    include: false,
+    excelHeader: this.caption??''
+}; 
 }

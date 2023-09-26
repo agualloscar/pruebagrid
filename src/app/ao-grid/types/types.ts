@@ -42,6 +42,10 @@ export interface HeaderConfig {
   backgroundColor?: string;
   textColor?: string;
 }
+export interface ExcelConfig {
+  include: boolean; // Para decidir si esta columna se incluirá o no.
+  excelHeader?: string; // El nombre de esta columna en el archivo Excel.
+}
 
   
   
