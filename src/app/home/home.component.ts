@@ -110,6 +110,11 @@ export class HomeComponent implements OnInit {
         dataField: 'name',
         dataType: 'string',
         caption: 'Nombre',
+        headerConfig:{
+          align:TextAlign.CENTER,
+          backgroundColor:'#E83813',
+          textColor:'#000'
+        },
         excelConfig:{
           include:true,
 

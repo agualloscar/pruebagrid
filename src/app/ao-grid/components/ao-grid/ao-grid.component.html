@@ -1,7 +1,11 @@
-<input type="button" value="Excel" (click)="exportToExcel()">
+<div class="flex justify-end items-start">
+    <button (click)="exportToExcel()" title="expor to excel"class="px-1 text-xl">
+        <fa-icon [icon]="faFileExport" class="text-gray-700"></fa-icon>
+    </button>
+</div>
 <div class="relative">
     <!-- El spinner -->
-    <div *ngIf="isLoading" class="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+    <div  *ngIf="isLoading && loadingType === 'spinner'" class="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
         <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-20 w-20"></div>
     </div>
     <!--fin spinner-->
@@ -20,11 +24,6 @@
                             [style.color]="column.headerConfig?.textColor || 'white'" [ngClass]="column.headerClass"
                             (click)="column.dataType !== 'action' && toggleSort(column.dataField)">
                             {{ column.caption ? column.caption : column.dataField }}
-                            <!-- <button *ngIf="column.showFilter" 
-                                    (click)="column.showFilter = !column.showFilter"
-                                    class="absolute top-0 right-0 mt-1 mr-2 text-white">
-                                <fa-icon [icon]="faFilter" class="text-sm"></fa-icon>
-                            </button> -->
                             <!-- Agrega el icono basado en el tipo de dato de la columna -->
                             <fa-icon
                                 *ngIf="column.dataField === currentSortField && (column.dataType === 'number' || column.dataType === 'currency')"
@@ -42,19 +41,11 @@
                     </ng-container>
                 </tr>
                 <tr>
-                    <!-- <ng-container *ngFor="let column of columns; let idx=index">
-                        <th [ngStyle]="getStickyStyle(column)" class="px-6 py-1 bg-gray-700" *ngIf="column.showFilter">
-                            <input [(ngModel)]="filterModel[column.dataField]" (input)="applyFilter()"
-                                class="p-1 w-full text-black rounded-md outline-none border-none shadow-none"
-                                placeholder="Filter..." />
-                        </th>
-                        <th *ngIf="!column.showFilter"></th>
-                    </ng-container> -->
                     <ng-container *ngIf="hasActions">
                         <th class="px-6 py-1"></th>
                     </ng-container>
                 </tr>
-                <tr *ngIf="isLoading">
+                <tr *ngIf="isLoading && loadingType === 'bar'">
                     <th colspan="100%" class="p-0 relative">
                         <div class="h-1 bg-gray-200 overflow-hidden">
                             <div class="bg-blue-500 h-full w-3/4 animate-moveRight"></div>

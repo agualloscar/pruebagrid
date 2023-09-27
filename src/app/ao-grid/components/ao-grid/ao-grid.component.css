@@ -86,7 +86,7 @@ table {
     opacity: .3;
     transition: 0s;
 }
-
+/*efecto de loading*/
 .loading-animation {
     width: 50%;
     animation: loading 1.5s infinite;

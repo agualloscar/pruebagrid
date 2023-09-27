@@ -18,9 +18,17 @@
         </ao-filter>
     </div>
     <div class="w-full">
-        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [columns]="columnsConfig" [filters]="currentFilters"></ao-grid>
+        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [columns]="columnsConfig" [filters]="currentFilters" [loadingType]="'bar'"></ao-grid>
     </div>
 </div>
+<!-- <div class="w-full">
+    <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig">
+        <ao-grid-column dataField="name" dataType="string" caption="nombre" ></ao-grid-column>
+        <ao-grid-column dataField="email" dataType="string" caption="email"></ao-grid-column>
+        <ao-grid-column dataField="country" dataType="string" caption="Pais"></ao-grid-column>
+        <ao-grid-column dataField="age" dataType="number" caption="Edad"  [width]="80"></ao-grid-column>
+    </ao-grid>
+</div> -->
 <!-- <span class="bg-red-500 text-white text-sm font-medium mr-2 px-2.5 py-0.5 rounded-l rounded-r-xl dark:bg-blue-900 dark:text-blue-300">Default</span> -->
 
 

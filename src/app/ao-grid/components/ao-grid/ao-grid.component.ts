@@ -1,9 +1,9 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
-import { faFilter, faSortUp, faSortDown, faArrowDownAZ, faArrowDownZA, faArrowDown19, faArrowDown91 } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faSortUp, faSortDown, faArrowDownAZ, faArrowDownZA, faArrowDown19, faArrowDown91,faFileExport } from '@fortawesome/free-solid-svg-icons';
 import { ActionButton, FixedColumn, FixedPosition, IDataService, TextAlign } from '../../types/types';
-import { HttpClient } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
+import * as ExcelJS from 'exceljs';
 //para excel
 import * as XLSX from 'xlsx';
 
@@ -18,6 +18,8 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   faArrowDownZA = faArrowDownZA;
   faArrowDown19 = faArrowDown19;
   faArrowDown91 = faArrowDown91;
+  //icono excel
+  faFileExport=faFileExport;
 
   faFilter = faFilter;
   TextAlign = TextAlign;
@@ -471,73 +473,166 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   }
 
   //logica para exportar a excel
+  // exportToExcel() {
+  //   const headerStyle = {
+  //     fill: {
+  //       fgColor: { rgb: "FF0000" } // Color rojo de ejemplo
+  //     },
+  //     font: {
+  //       color: { rgb: "FFFFFF" }, // Color de texto blanco
+  //       sz: 12, // Tamaño de la fuente
+  //       bold: true, // Texto en negritas
+  //       underline: false // Sin subrayado
+  //     }
+  //   };
+  //   // Obtener columnas que se incluirán en el Excel
+  //   const columnsToInclude = this.columns.filter(col => col.excelConfig?.include);
+  //   const filteredData = this.currentItemsToShow.map((row) => {
+  //     const newRow: any = {};
+  //     columnsToInclude.forEach(col => {
+  //       newRow[col.excelConfig?.excelHeader ?? col.caption ?? ''] = row[col.dataField];
+  //     });
+  //     return newRow;
+  //   });
+  //   const buffer = 1.10; // Ajusta este valor según tus necesidades.
+  //   const colWidths = columnsToInclude.map(col => {
+  //     let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length; // inicialmente el tamaño del encabezado
+  //     this.currentItemsToShow.forEach(row => {
+  //       const cellValue = `${row[col.dataField]}`;
+  //       if (cellValue && cellValue.length > maxLength) {
+  //         maxLength = cellValue.length;
+  //       }
+  //     });
+  //     return { wch: Math.ceil(maxLength * buffer) };
+  //   });
+  //   const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
+  //   // Aplicar las longitudes al objeto de hoja de trabajo
+  //   ws['!cols'] = colWidths;
+  //   // const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
+  //   // Crear los encabezados personalizados
+  //   const headers = columnsToInclude.map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
+  //   XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A1" });
+  //   // Configurar tipo de dato de celdas
+  //   let colIndex = 0;
+  //   columnsToInclude.forEach((col) => {
+  //     // Establece el tipo de dato del encabezado
+  //     const headerCellRef = XLSX.utils.encode_cell({ r: 0, c: colIndex });
+  //     ws[headerCellRef].t = 's';  // Encabezado siempre es string
+  //     ws[headerCellRef].s = headerStyle;  // Aplicar estilo
+  //     // Establece el tipo de dato para las celdas de datos basado en la configuración de columna
+  //     for (let rowIndex = 0; rowIndex < this.currentItemsToShow.length; rowIndex++) {
+  //       const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
+  //       if (ws[cellRef]) {
+  //         switch (col.dataType) {
+  //           case 'string':
+  //             ws[cellRef].t = 's';
+  //             break;
+  //           case 'number':
+  //           case 'currency':
+  //             ws[cellRef].t = 'n';
+  //             break;
+  //           default:
+  //             ws[cellRef].t = 's';
+  //         }
+  //       }
+  //     }
+  //     colIndex++;
+  //   });
+  //   const wb: XLSX.WorkBook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  //   XLSX.writeFile(wb, 'data.xlsx');
+  // }
+
+  private mapTextAlignToExcel(textAlign: TextAlign): ExcelJS.Alignment['horizontal'] {
+    return textAlign.toLowerCase() as ExcelJS.Alignment['horizontal'];
+}
+  
   exportToExcel() {
-    // Obtener columnas que se incluirán en el Excel
-    const columnsToInclude = this.columns.filter(col => col.excelConfig?.include);
-
-    const filteredData = this.currentItemsToShow.map((row) => {
-      const newRow: any = {};
-      columnsToInclude.forEach(col => {
-        newRow[col.excelConfig?.excelHeader ?? col.caption ?? ''] = row[col.dataField];
-      });
-      return newRow;
-    });
-    const buffer = 1.10; // Ajusta este valor según tus necesidades.
-    const colWidths = columnsToInclude.map(col => {
-      let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length; // inicialmente el tamaño del encabezado
-      this.currentItemsToShow.forEach(row => {
-        const cellValue = `${row[col.dataField]}`;
-        if (cellValue && cellValue.length > maxLength) {
-          maxLength = cellValue.length;
+    const workbook = new ExcelJS.Workbook();
+    
+    const worksheet = workbook.addWorksheet('Sheet1');
+    
+    // Agregar encabezados con estilos
+    const headers = this.columns.filter(col => col.excelConfig?.include)
+                     .map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
+    
+    headers.forEach((header, index) => {
+      const column = this.columns.filter(col => col.excelConfig?.include)[index];
+      const headerConfig = column?.headerConfig;
+      
+      // Aplicar valores por defecto si no se proporciona una configuración
+      const bgColor = headerConfig?.backgroundColor?.slice(1) ?? '374151'; // default color
+      const textColor = headerConfig?.textColor?.slice(1) ?? 'FFFFFFFF'; // default color
+      const align =this.mapTextAlignToExcel(headerConfig?.align ?? TextAlign.LEFT); // default alignment
+  
+      const cell = worksheet.getCell(1, index + 1);
+      cell.value = header;
+      cell.style = {
+        fill: {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: bgColor }
+        },
+        font: {
+          color: { argb: textColor },
+          size: 12,
+          bold: true
+        },
+        alignment: {
+          horizontal: align
         }
-      });
-      return { wch: Math.ceil(maxLength * buffer) };
+      };
     });
-
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
-
-    // Aplicar las longitudes al objeto de hoja de trabajo
-    ws['!cols'] = colWidths;
-    // const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
-
-    // Crear los encabezados personalizados
-    const headers = columnsToInclude.map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
-    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A1" });
-
-    // Configurar tipo de dato de celdas
-    let colIndex = 0;
-    columnsToInclude.forEach((col) => {
-      // Establece el tipo de dato del encabezado
-      const headerCellRef = XLSX.utils.encode_cell({ r: 0, c: colIndex });
-      ws[headerCellRef].t = 's';  // Encabezado siempre es string
-
-      // Establece el tipo de dato para las celdas de datos basado en la configuración de columna
-      for (let rowIndex = 0; rowIndex < this.currentItemsToShow.length; rowIndex++) {
-        const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
-        if (ws[cellRef]) {
+    
+    // Poblar datos
+    this.currentItemsToShow.forEach((row, rowIndex) => {
+      this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
+          const cell = worksheet.getCell(rowIndex + 2, colIndex + 1);
+          
           switch (col.dataType) {
-            case 'string':
-              ws[cellRef].t = 's';
-              break;
-            case 'number':
-            case 'currency':
-              ws[cellRef].t = 'n';
-              break;
-            default:
-              ws[cellRef].t = 's';
+              case 'string':
+                  cell.value = row[col.dataField];
+                  break;
+              case 'number':
+              case 'currency':
+                  if (typeof row[col.dataField] === 'number') {
+                      cell.value = row[col.dataField];
+                  } else {
+                      cell.value = null;
+                  }
+                  break;
+              default:
+                  cell.value = row[col.dataField];
           }
-        }
-      }
-
-      colIndex++;
+      });
     });
-
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    XLSX.writeFile(wb, 'data.xlsx');
+  
+    // Ajustar el ancho de las columnas
+    this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
+        let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length;
+        this.currentItemsToShow.forEach(row => {
+            const cellValue = `${row[col.dataField]}`;
+            if (cellValue && cellValue.length > maxLength) {
+                maxLength = cellValue.length;
+            }
+        });
+        const buffer = 1.25;
+        worksheet.getColumn(colIndex + 1).width = Math.ceil(maxLength * buffer);
+    });
+  
+    // Escribir a un archivo
+    workbook.xlsx.writeBuffer().then((data: any) => {
+        const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.xlsx';
+        a.click();
+    });
   }
+  
 
 
-
-
+  //para el tipo de loading
+  @Input() loadingType: 'spinner' | 'bar' = 'spinner';  // por defecto será 'spinner'
 }
