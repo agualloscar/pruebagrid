@@ -10,15 +10,15 @@
 
 <ao-grid [dataSource]="myData" [itemsToLoadAtOnce]="25" [columns]="columnsConfig"></ao-grid> -->
 <div class="flex flex-col items-end">
-    <div class="w-1/4 p-2">
+    <!-- <div class="w-1/4 p-2">
         <ao-filter 
             [fields]="['name','email','id']"
             [placeholder]="'Filter by Name and Email...'"
             (filterChange)="handleFilterChange($event)">
         </ao-filter>
-    </div>
+    </div> -->
     <div class="w-full">
-        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [columns]="columnsConfig" [filters]="currentFilters" [loadingType]="'bar'"></ao-grid>
+        <ao-grid [dataService]="dataFunction" [fixedColumns]="fixedColumnsConfig" [columns]="columnsConfig" [filterFields]="['name','age']" [loadingType]="'bar'"></ao-grid>
     </div>
 </div>
 <!-- <div class="w-full">

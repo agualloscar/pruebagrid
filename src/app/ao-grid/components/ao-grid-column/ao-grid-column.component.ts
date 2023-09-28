@@ -12,7 +12,7 @@ export class AOGridColumnComponent {
   @Input() currencyCode?: string = 'USD';  // Por defecto USD
   //@Input() showFilter?: boolean = false;
   @Input() caption?: string = '';
-  @Input() fixed?: FixedPosition | null = null;
+  //@Input() fixed?: FixedPosition | null = null;
   @Input() width?: number;
   @Input() headerClass?: string = ''; // Este es el nuevo input para la clase
   //para definir una columna como action

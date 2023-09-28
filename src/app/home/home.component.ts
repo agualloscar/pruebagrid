@@ -90,7 +90,7 @@ export class HomeComponent implements OnInit {
         dataField: 'id',
         dataType: 'tag',
         caption: 'ID',
-        fixed: 'left',
+        //fixed: 'left',
         headerClass: '',
         align:TextAlign.CENTER,
         tagConfig: {
@@ -112,7 +112,7 @@ export class HomeComponent implements OnInit {
         caption: 'Nombre',
         headerConfig:{
           align:TextAlign.CENTER,
-          backgroundColor:'#E83813',
+          backgroundColor:'rgb(255, 0, 0)',
           textColor:'#000'
         },
         excelConfig:{

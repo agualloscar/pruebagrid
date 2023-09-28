@@ -1,7 +1,11 @@
-<div class="relative rounded-md shadow-sm">
-    <input 
+<div class="relative">
+  <input 
       type="text" 
       (keyup.enter)="onInputChange($event)"
-      class="form-input block w-full sm:text-sm sm:leading-5 border border-gray-300 rounded" 
+      class="form-input block w-full sm:text-sm sm:leading-5 border border-gray-300 rounded pl-10 h-6" 
       placeholder="{{placeholder}}" />
+  <span class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400">
+    <fa-icon [icon]="faSearch" class="text-gray-700"></fa-icon>
+  </span>
 </div>
+

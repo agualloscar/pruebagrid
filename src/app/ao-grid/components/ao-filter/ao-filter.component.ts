@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-
+import { faSearch} from '@fortawesome/free-solid-svg-icons';
 @Component({
   selector: 'ao-filter',
   templateUrl: './ao-filter.component.html',
   styleUrls: ['./ao-filter.component.css']
 })
 export class AOFilterComponent {
-
+  faSearch=faSearch;
   @Input() fields: string[] = [];
   @Input() placeholder: string = 'Filter...';
   @Output() filterChange: EventEmitter<{ [key: string]: string }> = new EventEmitter();

@@ -1,11 +1,19 @@
-<div class="flex justify-end items-start">
-    <button (click)="exportToExcel()" title="expor to excel"class="px-1 text-xl">
-        <fa-icon [icon]="faFileExport" class="text-gray-700"></fa-icon>
-    </button>
+<div class="flex justify-end items-center">
+    <div class="md:w-1/4 sm:w-full">
+        <ao-filter [fields]="filterFields" [placeholder]="'Filter...'" (filterChange)="handleFilterChange($event)">
+        </ao-filter>
+    </div>
+    <div class="">
+        <button (click)="exportToExcel()" title="expor to excel" class="px-1 text-xl">
+            <fa-icon [icon]="faFileExcel" class="text-gray-700"></fa-icon>
+        </button>
+    </div>
 </div>
+
 <div class="relative">
     <!-- El spinner -->
-    <div  *ngIf="isLoading && loadingType === 'spinner'" class="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+    <div *ngIf="isLoading && loadingType === 'spinner'"
+        class="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
         <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-20 w-20"></div>
     </div>
     <!--fin spinner-->
@@ -83,7 +91,7 @@
                                     [style.color]="column.tagConfig.textColor?column.tagConfig.textColor(item):''"
                                     [style.min-width.px]="60" [style.display]="'flex'"
                                     [style.width.px]="column.tagConfig.width"
-                                    class="text-sm text-center font-medium mr-2 px-2.5 py-0.5 rounded-l rounded-r-xl justify-center items-center">
+                                    class="text-sm text-center font-medium mr-2 px-2.5 py-0.5 rounded-r-xl justify-center items-center">
                                     {{ column.tagConfig.formatter ? column.tagConfig.formatter(item) :
                                     item[column.dataField] }}
                                 </span>

@@ -1,11 +1,12 @@
 import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
-import { faFilter, faSortUp, faSortDown, faArrowDownAZ, faArrowDownZA, faArrowDown19, faArrowDown91,faFileExport } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faSortUp, faSortDown, faArrowDownAZ, faArrowDownZA, faArrowDown19, faArrowDown91, faFileExcel } from '@fortawesome/free-solid-svg-icons';
 import { ActionButton, FixedColumn, FixedPosition, IDataService, TextAlign } from '../../types/types';
 import { CurrencyPipe } from '@angular/common';
 import * as ExcelJS from 'exceljs';
 //para excel
 import * as XLSX from 'xlsx';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'ao-grid',
@@ -19,7 +20,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   faArrowDown19 = faArrowDown19;
   faArrowDown91 = faArrowDown91;
   //icono excel
-  faFileExport=faFileExport;
+  faFileExcel = faFileExcel;
 
   faFilter = faFilter;
   TextAlign = TextAlign;
@@ -54,21 +55,21 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       console.log('fixedIput', this.fixedColumnsSetByInput);
       //this.calculateColumnOffsets();
     }
-    if (changes['filters']) {
-      console.log('se mostro los filters en el aogrid')
-      console.log(this.filters)
-      // Comprueba si antes tenías filtros y ahora están vacíos
-      const hadFiltersBefore = Object.keys(this.previousFilters).length !== 0;
-      const hasNoFiltersNow = Object.keys(this.filters).length === 0;
+    // if (changes['filters']) {
+    //   console.log('se mostro los filters en el aogrid')
+    //   console.log(this.filters)
+    //   // Comprueba si antes tenías filtros y ahora están vacíos
+    //   const hadFiltersBefore = Object.keys(this.previousFilters).length !== 0;
+    //   const hasNoFiltersNow = Object.keys(this.filters).length === 0;
 
-      if (Object.keys(this.filters).length !== 0 || (hadFiltersBefore && hasNoFiltersNow)) {
-        this.hasReachedEndOfData = false;
-        await this.loadMoreDataFilter();
-      }
+    //   if (Object.keys(this.filters).length !== 0 || (hadFiltersBefore && hasNoFiltersNow)) {
+    //     this.hasReachedEndOfData = false;
+    //     await this.loadMoreDataFilter();
+    //   }
 
-      // Actualiza previousFilters con el estado actual de los filtros
-      this.previousFilters = { ...this.filters };
-    }
+    //   // Actualiza previousFilters con el estado actual de los filtros
+    //   this.previousFilters = { ...this.filters };
+    // }
   }
   loadMoreItems(): void {
     this.displayedItemsCount += this.itemsToLoad;
@@ -291,11 +292,11 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       }
     }
     // Si no se han establecido columnas fijas a través del Input
-    if (this.fixedColumns.length === 0) {
-      this.fixedColumns = this.columns
-        .filter(column => column.fixed !== undefined)
-        .map(column => ({ dataField: column.dataField, position: column.fixed as FixedPosition }));
-    }
+    // if (this.fixedColumns.length === 0) {
+    //   this.fixedColumns = this.columns
+    //     .filter(column => column.fixed !== undefined)
+    //     .map(column => ({ dataField: column.dataField, position: column.fixed as FixedPosition }));
+    // }
     if (this.fixedColumnsSetByInput) {  // Comprueba la bandera aquí.
       this.orderColumnsBasedOnFixed();
     }
@@ -456,9 +457,13 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   //fin
 
   //logica para filtros
-  @Input() filters: any = {};
+  /*@Input()*/ filters: any = {};
   @Input() apiUrl: string = '';
-  constructor(private cdRef: ChangeDetectorRef, private currencyPipe: CurrencyPipe) { }
+  constructor(private cdRef: ChangeDetectorRef, private currencyPipe: CurrencyPipe) {
+    this.filters$.subscribe(newFilters => {
+      this.cambiaFiltro(newFilters);
+    });
+  }
   //fin
 
   //logica para iconos en actions
@@ -473,98 +478,59 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   }
 
   //logica para exportar a excel
-  // exportToExcel() {
-  //   const headerStyle = {
-  //     fill: {
-  //       fgColor: { rgb: "FF0000" } // Color rojo de ejemplo
-  //     },
-  //     font: {
-  //       color: { rgb: "FFFFFF" }, // Color de texto blanco
-  //       sz: 12, // Tamaño de la fuente
-  //       bold: true, // Texto en negritas
-  //       underline: false // Sin subrayado
-  //     }
-  //   };
-  //   // Obtener columnas que se incluirán en el Excel
-  //   const columnsToInclude = this.columns.filter(col => col.excelConfig?.include);
-  //   const filteredData = this.currentItemsToShow.map((row) => {
-  //     const newRow: any = {};
-  //     columnsToInclude.forEach(col => {
-  //       newRow[col.excelConfig?.excelHeader ?? col.caption ?? ''] = row[col.dataField];
-  //     });
-  //     return newRow;
-  //   });
-  //   const buffer = 1.10; // Ajusta este valor según tus necesidades.
-  //   const colWidths = columnsToInclude.map(col => {
-  //     let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length; // inicialmente el tamaño del encabezado
-  //     this.currentItemsToShow.forEach(row => {
-  //       const cellValue = `${row[col.dataField]}`;
-  //       if (cellValue && cellValue.length > maxLength) {
-  //         maxLength = cellValue.length;
-  //       }
-  //     });
-  //     return { wch: Math.ceil(maxLength * buffer) };
-  //   });
-  //   const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
-  //   // Aplicar las longitudes al objeto de hoja de trabajo
-  //   ws['!cols'] = colWidths;
-  //   // const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData, { skipHeader: true });
-  //   // Crear los encabezados personalizados
-  //   const headers = columnsToInclude.map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
-  //   XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A1" });
-  //   // Configurar tipo de dato de celdas
-  //   let colIndex = 0;
-  //   columnsToInclude.forEach((col) => {
-  //     // Establece el tipo de dato del encabezado
-  //     const headerCellRef = XLSX.utils.encode_cell({ r: 0, c: colIndex });
-  //     ws[headerCellRef].t = 's';  // Encabezado siempre es string
-  //     ws[headerCellRef].s = headerStyle;  // Aplicar estilo
-  //     // Establece el tipo de dato para las celdas de datos basado en la configuración de columna
-  //     for (let rowIndex = 0; rowIndex < this.currentItemsToShow.length; rowIndex++) {
-  //       const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
-  //       if (ws[cellRef]) {
-  //         switch (col.dataType) {
-  //           case 'string':
-  //             ws[cellRef].t = 's';
-  //             break;
-  //           case 'number':
-  //           case 'currency':
-  //             ws[cellRef].t = 'n';
-  //             break;
-  //           default:
-  //             ws[cellRef].t = 's';
-  //         }
-  //       }
-  //     }
-  //     colIndex++;
-  //   });
-  //   const wb: XLSX.WorkBook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  //   XLSX.writeFile(wb, 'data.xlsx');
-  // }
-
   private mapTextAlignToExcel(textAlign: TextAlign): ExcelJS.Alignment['horizontal'] {
     return textAlign.toLowerCase() as ExcelJS.Alignment['horizontal'];
+  }
+  private toArgb(color: string): string {
+    // Función auxiliar para convertir un color en formato rgba a argb
+    function rgbaToArgb(rgba: string): string {
+        const matches = rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*(\d*\.?\d*)\)$/i);
+        if (!matches) return '';
+        const alpha = (parseFloat(matches[4] || '1') * 255).toString(16).padStart(2, '0');
+        return alpha.toUpperCase() + parseInt(matches[1]).toString(16).padStart(2, '0').toUpperCase() +
+               parseInt(matches[2]).toString(16).padStart(2, '0').toUpperCase() +
+               parseInt(matches[3]).toString(16).padStart(2, '0').toUpperCase();
+    }
+
+    // Caso: RGB o RGBA
+    if (/^rgba?\(/.test(color)) {
+        return rgbaToArgb(color);
+    }
+    // Caso: hex
+    else if (/^#/.test(color)) {
+        color = color.slice(1); // Elimina el '#'
+        if (color.length === 3) { // Transforma #RGB -> RRGGBB
+            color = color.split('').map(char => char + char).join('');
+        }
+        return 'FF' + color.toUpperCase();
+    }
+    // En caso de que no se pueda determinar el formato, devuelve un valor por defecto o lanza un error.
+    return 'FFFFFFFF'; 
 }
-  
-  exportToExcel() {
+  async exportToExcel() {
     const workbook = new ExcelJS.Workbook();
-    
+
     const worksheet = workbook.addWorksheet('Sheet1');
-    
+    const filtersString = encodeURIComponent(JSON.stringify(this.filters));
+    const response = await this.dataService?.fetchData(0, 0, filtersString).toPromise();
+    console.log(response)
+    if (!response) {
+      throw new Error('Network response was not ok');
+    }
+    const newItems: Array<any> = response.data;
+
     // Agregar encabezados con estilos
     const headers = this.columns.filter(col => col.excelConfig?.include)
-                     .map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
-    
+      .map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
+
     headers.forEach((header, index) => {
       const column = this.columns.filter(col => col.excelConfig?.include)[index];
       const headerConfig = column?.headerConfig;
-      
       // Aplicar valores por defecto si no se proporciona una configuración
-      const bgColor = headerConfig?.backgroundColor?.slice(1) ?? '374151'; // default color
-      const textColor = headerConfig?.textColor?.slice(1) ?? 'FFFFFFFF'; // default color
-      const align =this.mapTextAlignToExcel(headerConfig?.align ?? TextAlign.LEFT); // default alignment
-  
+      const bgColor = this.toArgb(headerConfig?.backgroundColor??'#374151');
+      const textColor = this.toArgb(headerConfig?.textColor ?? 'FFFFFFFF'); // default color
+      const align = this.mapTextAlignToExcel(headerConfig?.align ?? TextAlign.LEFT); // default alignment
+
       const cell = worksheet.getCell(1, index + 1);
       cell.value = header;
       cell.style = {
@@ -583,56 +549,119 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
         }
       };
     });
-    
+
     // Poblar datos
-    this.currentItemsToShow.forEach((row, rowIndex) => {
+    newItems.forEach((row, rowIndex) => {
       this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
-          const cell = worksheet.getCell(rowIndex + 2, colIndex + 1);
-          
-          switch (col.dataType) {
-              case 'string':
-                  cell.value = row[col.dataField];
-                  break;
-              case 'number':
-              case 'currency':
-                  if (typeof row[col.dataField] === 'number') {
-                      cell.value = row[col.dataField];
-                  } else {
-                      cell.value = null;
-                  }
-                  break;
-              default:
-                  cell.value = row[col.dataField];
-          }
+        const cell = worksheet.getCell(rowIndex + 2, colIndex + 1);
+
+        switch (col.dataType) {
+          case 'string':
+            cell.value = row[col.dataField];
+            break;
+          case 'number':
+          case 'currency':
+            if (typeof row[col.dataField] === 'number') {
+              cell.value = row[col.dataField];
+            } else {
+              cell.value = null;
+            }
+            break;
+          default:
+            cell.value = row[col.dataField];
+        }
       });
     });
-  
+
     // Ajustar el ancho de las columnas
     this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
-        let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length;
-        this.currentItemsToShow.forEach(row => {
-            const cellValue = `${row[col.dataField]}`;
-            if (cellValue && cellValue.length > maxLength) {
-                maxLength = cellValue.length;
-            }
-        });
-        const buffer = 1.25;
-        worksheet.getColumn(colIndex + 1).width = Math.ceil(maxLength * buffer);
+      let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length;
+      newItems.forEach(row => {
+        const cellValue = `${row[col.dataField]}`;
+        if (cellValue && cellValue.length > maxLength) {
+          maxLength = cellValue.length;
+        }
+      });
+      const buffer = 1.25;
+      worksheet.getColumn(colIndex + 1).width = Math.ceil(maxLength * buffer);
     });
-  
+
     // Escribir a un archivo
     workbook.xlsx.writeBuffer().then((data: any) => {
-        const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'data.xlsx';
-        a.click();
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.xlsx';
+      a.click();
     });
   }
-  
+
 
 
   //para el tipo de loading
   @Input() loadingType: 'spinner' | 'bar' = 'spinner';  // por defecto será 'spinner'
+
+  //para el filtrado
+  filtersNew: any = {};
+  @Input() filterFields: Array<string> = [];
+  currentFilters: { [key: string]: string } = {};
+  private _filtersSubject: BehaviorSubject<{ [key: string]: string } | null> = new BehaviorSubject(this.filtersNew);
+  filters$ = this._filtersSubject.asObservable();
+
+  handleFilterChange(newFilters: { [key: string]: any }) {
+    console.log('se dio enter', newFilters);
+
+    // Itera sobre las claves en newFilters
+    Object.keys(newFilters).forEach(key => {
+      // Encuentra una columna en this.columns que coincida con la clave actual
+      const matchingColumn = this.columns.find(column => column.dataField === key);
+      console.log(matchingColumn)
+      if (matchingColumn) {
+        console.log(matchingColumn.dataType)
+        switch (matchingColumn.dataType) {
+          case 'currency':
+          case 'number':
+
+            // Verifica si el valor es realmente un número
+            if (isNaN(Number(newFilters[key]))) {
+              console.log('no es numero')
+              // Si no es un número, elimina esa propiedad de newFilters
+              delete newFilters[key];
+            } else {
+              // Si es un número, lo convierte a su representación en cadena (opcional, según tus necesidades)
+              newFilters[key] = Number(newFilters[key]);
+            }
+            break;
+          case 'string':
+            // Si es un string, no necesita hacer nada
+            break;
+          // Puedes agregar más casos aquí para otros dataTypes
+          default:
+            // Si no sabes cómo manejar un dataType específico, simplemente deja el valor como está
+            break;
+        }
+      }
+    });
+
+    // Actualiza el valor de this.filters
+    this.filters = newFilters;
+
+    // Notifica a los suscriptores del cambio
+    this._filtersSubject.next(newFilters);
+  }
+
+  async cambiaFiltro(filtro: any) {
+    console.log('cambio filtro', filtro)
+    const hadFiltersBefore = Object.keys(this.previousFilters).length !== 0;
+    const hasNoFiltersNow = Object.keys(this.filters).length === 0;
+
+    if (Object.keys(this.filters).length !== 0 || (hadFiltersBefore && hasNoFiltersNow)) {
+      this.hasReachedEndOfData = false;
+      await this.loadMoreDataFilter();
+    }
+
+    // Actualiza previousFilters con el estado actual de los filtros
+    this.previousFilters = { ...this.filters };
+  }
 }
