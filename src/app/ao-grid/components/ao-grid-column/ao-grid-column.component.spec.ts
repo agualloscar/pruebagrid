@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AoGridColumnComponent } from './ao-grid-column.component';
+import { AOGridColumnComponent } from './ao-grid-column.component';
 
 describe('AoGridColumnComponent', () => {
-  let component: AoGridColumnComponent;
-  let fixture: ComponentFixture<AoGridColumnComponent>;
+  let component: AOGridColumnComponent;
+  let fixture: ComponentFixture<AOGridColumnComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AoGridColumnComponent]
+      declarations: [AOGridColumnComponent]
     });
-    fixture = TestBed.createComponent(AoGridColumnComponent);
+    fixture = TestBed.createComponent(AOGridColumnComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

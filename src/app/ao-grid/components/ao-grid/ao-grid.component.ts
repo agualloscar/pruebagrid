@@ -1,11 +1,9 @@
-import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ContentChildren, ElementRef, EventEmitter, Input, OnChanges, Output, QueryList, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
 import { faFilter, faSortUp, faSortDown, faArrowDownAZ, faArrowDownZA, faArrowDown19, faArrowDown91, faFileExcel } from '@fortawesome/free-solid-svg-icons';
-import { ActionButton, FixedColumn, FixedPosition, IDataService, TextAlign } from '../../types/types';
+import { ActionButton, FixedColumn, IDataService, TextAlign } from '../../types/types';
 import { CurrencyPipe } from '@angular/common';
 import * as ExcelJS from 'exceljs';
-//para excel
-import * as XLSX from 'xlsx';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -251,15 +249,18 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     //fin
   }
   @Input() dataService?: IDataService;
-  ngAfterContentInit() {
+  async ngAfterContentInit() {
     const take = this.itemsToLoad;
     const filtersString = encodeURIComponent(JSON.stringify(this.filters));
     // Si dataSource no se ha pasado como Input, cargarlo del dataService
     if (!this.dataSource || this.dataSource.length === 0) {
-      this.dataService?.fetchData(this.skip, take, filtersString).subscribe(data => {
-        this.dataSource = data.data;
-        this.initializeColumns();
-      });
+      const data=await this.dataService?.fetchData(this.skip, take, filtersString).toPromise();
+      this.dataSource=data.data;
+      this.initializeColumns();
+      // this.dataService?.fetchData(this.skip, take, filtersString).subscribe(data => {
+      //   this.dataSource = data.data;
+      //   this.initializeColumns();
+      // });
     } else {
       this.initializeColumns();
     }
@@ -484,117 +485,122 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   private toArgb(color: string): string {
     // Función auxiliar para convertir un color en formato rgba a argb
     function rgbaToArgb(rgba: string): string {
-        const matches = rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*(\d*\.?\d*)\)$/i);
-        if (!matches) return '';
-        const alpha = (parseFloat(matches[4] || '1') * 255).toString(16).padStart(2, '0');
-        return alpha.toUpperCase() + parseInt(matches[1]).toString(16).padStart(2, '0').toUpperCase() +
-               parseInt(matches[2]).toString(16).padStart(2, '0').toUpperCase() +
-               parseInt(matches[3]).toString(16).padStart(2, '0').toUpperCase();
+      const matches = rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*(\d*\.?\d*)\)$/i);
+      if (!matches) return '';
+      const alpha = (parseFloat(matches[4] || '1') * 255).toString(16).padStart(2, '0');
+      return alpha.toUpperCase() + parseInt(matches[1]).toString(16).padStart(2, '0').toUpperCase() +
+        parseInt(matches[2]).toString(16).padStart(2, '0').toUpperCase() +
+        parseInt(matches[3]).toString(16).padStart(2, '0').toUpperCase();
     }
 
     // Caso: RGB o RGBA
     if (/^rgba?\(/.test(color)) {
-        return rgbaToArgb(color);
+      return rgbaToArgb(color);
     }
     // Caso: hex
     else if (/^#/.test(color)) {
-        color = color.slice(1); // Elimina el '#'
-        if (color.length === 3) { // Transforma #RGB -> RRGGBB
-            color = color.split('').map(char => char + char).join('');
-        }
-        return 'FF' + color.toUpperCase();
+      color = color.slice(1); // Elimina el '#'
+      if (color.length === 3) { // Transforma #RGB -> RRGGBB
+        color = color.split('').map(char => char + char).join('');
+      }
+      return 'FF' + color.toUpperCase();
     }
     // En caso de que no se pueda determinar el formato, devuelve un valor por defecto o lanza un error.
-    return 'FFFFFFFF'; 
-}
+    return 'FFFFFFFF';
+  }
   async exportToExcel() {
-    const workbook = new ExcelJS.Workbook();
+    try {
+      const workbook = new ExcelJS.Workbook();
 
-    const worksheet = workbook.addWorksheet('Sheet1');
-    const filtersString = encodeURIComponent(JSON.stringify(this.filters));
-    const response = await this.dataService?.fetchData(0, 0, filtersString).toPromise();
-    console.log(response)
-    if (!response) {
-      throw new Error('Network response was not ok');
-    }
-    const newItems: Array<any> = response.data;
+      const worksheet = workbook.addWorksheet('Sheet1');
+      const filtersString = encodeURIComponent(JSON.stringify(this.filters));
+      const response = await this.dataService?.fetchData(0, 0, filtersString).toPromise();
+      console.log(response)
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
+      const newItems: Array<any> = response.data;
 
-    // Agregar encabezados con estilos
-    const headers = this.columns.filter(col => col.excelConfig?.include)
-      .map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
+      // Agregar encabezados con estilos
+      const headers = this.columns.filter(col => col.excelConfig?.include)
+        .map(col => col.excelConfig?.excelHeader ?? col.caption ?? '');
 
-    headers.forEach((header, index) => {
-      const column = this.columns.filter(col => col.excelConfig?.include)[index];
-      const headerConfig = column?.headerConfig;
-      // Aplicar valores por defecto si no se proporciona una configuración
-      const bgColor = this.toArgb(headerConfig?.backgroundColor??'#374151');
-      const textColor = this.toArgb(headerConfig?.textColor ?? 'FFFFFFFF'); // default color
-      const align = this.mapTextAlignToExcel(headerConfig?.align ?? TextAlign.LEFT); // default alignment
+      headers.forEach((header, index) => {
+        const column = this.columns.filter(col => col.excelConfig?.include)[index];
+        const headerConfig = column?.headerConfig;
+        // Aplicar valores por defecto si no se proporciona una configuración
+        const bgColor = this.toArgb(headerConfig?.backgroundColor ?? '#374151');
+        const textColor = this.toArgb(headerConfig?.textColor ?? 'FFFFFFFF'); // default color
+        const align = this.mapTextAlignToExcel(headerConfig?.align ?? TextAlign.LEFT); // default alignment
 
-      const cell = worksheet.getCell(1, index + 1);
-      cell.value = header;
-      cell.style = {
-        fill: {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: bgColor }
-        },
-        font: {
-          color: { argb: textColor },
-          size: 12,
-          bold: true
-        },
-        alignment: {
-          horizontal: align
-        }
-      };
-    });
+        const cell = worksheet.getCell(1, index + 1);
+        cell.value = header;
+        cell.style = {
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: bgColor }
+          },
+          font: {
+            color: { argb: textColor },
+            size: 12,
+            bold: true
+          },
+          alignment: {
+            horizontal: align
+          }
+        };
+      });
 
-    // Poblar datos
-    newItems.forEach((row, rowIndex) => {
-      this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
-        const cell = worksheet.getCell(rowIndex + 2, colIndex + 1);
+      // Poblar datos
+      newItems.forEach((row, rowIndex) => {
+        this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
+          const cell = worksheet.getCell(rowIndex + 2, colIndex + 1);
 
-        switch (col.dataType) {
-          case 'string':
-            cell.value = row[col.dataField];
-            break;
-          case 'number':
-          case 'currency':
-            if (typeof row[col.dataField] === 'number') {
+          switch (col.dataType) {
+            case 'string':
               cell.value = row[col.dataField];
-            } else {
-              cell.value = null;
-            }
-            break;
-          default:
-            cell.value = row[col.dataField];
-        }
+              break;
+            case 'number':
+            case 'currency':
+              if (typeof row[col.dataField] === 'number') {
+                cell.value = row[col.dataField];
+              } else {
+                cell.value = null;
+              }
+              break;
+            default:
+              cell.value = row[col.dataField];
+          }
+        });
       });
-    });
 
-    // Ajustar el ancho de las columnas
-    this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
-      let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length;
-      newItems.forEach(row => {
-        const cellValue = `${row[col.dataField]}`;
-        if (cellValue && cellValue.length > maxLength) {
-          maxLength = cellValue.length;
-        }
+      // Ajustar el ancho de las columnas
+      this.columns.filter(col => col.excelConfig?.include).forEach((col, colIndex) => {
+        let maxLength = (col.excelConfig?.excelHeader ?? col.caption ?? '').length;
+        newItems.forEach(row => {
+          const cellValue = `${row[col.dataField]}`;
+          if (cellValue && cellValue.length > maxLength) {
+            maxLength = cellValue.length;
+          }
+        });
+        const buffer = 1.25;
+        worksheet.getColumn(colIndex + 1).width = Math.ceil(maxLength * buffer);
       });
-      const buffer = 1.25;
-      worksheet.getColumn(colIndex + 1).width = Math.ceil(maxLength * buffer);
-    });
 
-    // Escribir a un archivo
-    workbook.xlsx.writeBuffer().then((data: any) => {
+      // Escribir a un archivo
+      // Escribir a un archivo
+      const data = await workbook.xlsx.writeBuffer();
       const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'data.xlsx';
       a.click();
-    });
+    }
+    catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }
 
 

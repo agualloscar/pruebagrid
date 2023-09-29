@@ -11,7 +11,7 @@ export class AOFilterComponent {
   @Input() placeholder: string = 'Filter...';
   @Output() filterChange: EventEmitter<{ [key: string]: string }> = new EventEmitter();
 
-  onInputChange(event: Event) {
+  onInputChange(event: any) {
     let inputValue = (event.target as HTMLInputElement).value;
     if(inputValue){
       let filters: { [key: string]: string } = {};
@@ -24,5 +24,13 @@ export class AOFilterComponent {
     }
     else 
     this.filterChange.emit({});
+  }
+  //logica dropdown
+  showDropdown = false;
+
+  // ... Otros métodos y propiedades ...
+
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
   }
 }

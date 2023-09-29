@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AoFilterComponent } from './ao-filter.component';
+import { AOFilterComponent } from './ao-filter.component';
 
 describe('AoFilterComponent', () => {
-  let component: AoFilterComponent;
-  let fixture: ComponentFixture<AoFilterComponent>;
+  let component: AOFilterComponent;
+  let fixture: ComponentFixture<AOFilterComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AoFilterComponent]
+      declarations: [AOFilterComponent]
     });
-    fixture = TestBed.createComponent(AoFilterComponent);
+    fixture = TestBed.createComponent(AOFilterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
