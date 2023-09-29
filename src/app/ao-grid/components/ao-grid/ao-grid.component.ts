@@ -182,7 +182,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       setTimeout(() => {
         this.isLoading = false;
         this.isLoadingMoreData = false;
-      }, 500);
+      }, 700);
     }
   }
   // async onScroll(event: any) {

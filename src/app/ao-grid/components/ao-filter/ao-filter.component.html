@@ -22,7 +22,7 @@
   </div> -->
 
   <!-- Input -->
-  <input #searchInput type="text" (keyup.enter)="onInputChange($event)"
+  <input #searchInput type="text"  (keyup)="handleKeyup($event)"
     class="form-input flex-grow sm:text-sm sm:leading-5 border-t border-b border-l border-gray-300 pl-10 h-8 rounded-l-md focus:border-r-0 focus:ring-0"
     placeholder="{{placeholder}}" />
 

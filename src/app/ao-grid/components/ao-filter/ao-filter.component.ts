@@ -33,4 +33,13 @@ export class AOFilterComponent {
   toggleDropdown() {
     this.showDropdown = !this.showDropdown;
   }
+  handleKeyup(event: KeyboardEvent) {
+    const input: HTMLInputElement = event.target as HTMLInputElement;
+
+    // Si se presionó 'Enter' o si el input está vacío
+    if (event.key === 'Enter' || input.value === '') {
+        this.onInputChange(event);
+    }
+}
+
 }
