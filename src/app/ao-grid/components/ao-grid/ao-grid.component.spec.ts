@@ -18,35 +18,12 @@ class MockQueryList<T> extends QueryList<T> {
     this.length = items.length;
   }
 }
-
-
-
-
 // Mock del servicio DataService
 const dataServiceMock = {
   fetchData: jasmine.createSpy('fetchData').and.returnValue(of({ data: [{email:'email@email.com',address:'por ahi',age:28}], total: 1 }))
 };
-
-describe('AOGridComponent', () => {
-  let component: AOGridComponent;
-  let fixture: ComponentFixture<AOGridComponent>;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [AOGridComponent],
-      providers: [{ provide: DataService, useValue: dataServiceMock },CurrencyPipe],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
-    });
-
-    fixture = TestBed.createComponent(AOGridComponent);
-    component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-  it('should initialize columns based on projectedColumns or dataSource', () => {
-    let columns:AOGridColumnComponent[]=[{
+//columnas
+ const columns:AOGridColumnComponent[]=[{
       dataField: 'email',
       dataType: 'string',
       caption: 'Email',
@@ -75,6 +52,27 @@ describe('AOGridComponent', () => {
         
       }
     }];
+describe('AOGridComponent', () => {
+  let component: AOGridComponent;
+  let fixture: ComponentFixture<AOGridComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [AOGridComponent],
+      providers: [{ provide: DataService, useValue: dataServiceMock },CurrencyPipe],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    });
+
+    fixture = TestBed.createComponent(AOGridComponent);
+    component = fixture.componentInstance;
+    component.dataService=dataServiceMock;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+  it('should initialize columns based on projectedColumns or dataSource', () => {
+    
     component.dataSource=[{email:'email@email.com',address:'por ahi',age:28}];
       fixture.detectChanges();
 
@@ -83,6 +81,7 @@ describe('AOGridComponent', () => {
     component.ngAfterContentInit();
     // Assert
     expect(component.columns.length).toBeGreaterThan(0);
+    console.log(component.columns)
     // ... any other assertions related to what initializeColumns does
   });
 
