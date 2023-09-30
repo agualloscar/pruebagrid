@@ -66,6 +66,7 @@ describe('AOGridComponent', () => {
     fixture = TestBed.createComponent(AOGridComponent);
     component = fixture.componentInstance;
     component.dataService=dataServiceMock;
+    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -74,7 +75,7 @@ describe('AOGridComponent', () => {
   it('should initialize columns based on projectedColumns or dataSource', () => {
     
     component.dataSource=[{email:'email@email.com',address:'por ahi',age:28}];
-      fixture.detectChanges();
+      
 
     // Act
     // Assuming initializeColumns gets called within ngAfterContentInit
