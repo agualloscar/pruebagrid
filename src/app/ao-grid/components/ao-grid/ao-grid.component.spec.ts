@@ -2,90 +2,76 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { AOGridComponent } from './ao-grid.component';
 import { DataService } from '../../services/data.service';
 import { of } from 'rxjs';
-import { TextAlign } from '../../types/types';
+import { IDataService, TextAlign } from '../../types/types';
 import { CUSTOM_ELEMENTS_SCHEMA, QueryList } from '@angular/core';
 import { AOGridColumnComponent } from '../ao-grid-column/ao-grid-column.component';
 import { CurrencyPipe } from '@angular/common';
-class MockQueryList<T> extends QueryList<T> {
-  items: T[]=[];
-  override length = 0;  // Add override modifier here
+import { HttpClientModule } from '@angular/common/http';
 
-  override toArray() {
-    return this.items;
-  }
-  override reset(items: T[]) {
-    this.items = items;
-    this.length = items.length;
-  }
-}
-// Mock del servicio DataService
-const dataServiceMock = {
-  fetchData: jasmine.createSpy('fetchData').and.returnValue(of({ data: [{email:'email@email.com',address:'por ahi',age:28}], total: 1 }))
-};
 //columnas
- const columns:AOGridColumnComponent[]=[{
-      dataField: 'email',
-      dataType: 'string',
-      caption: 'Email',
-      excelConfig:{
-        include:true,
-        
-      }
-    },
-    {
-      dataField: 'address',
-      dataType: 'string',
-      caption: 'Direccion',
-      align:TextAlign.CENTER,
-    },
-    {
-      dataField: 'age',
-      dataType: 'currency',
-      caption: 'Edad',
-      align:TextAlign.RIGHT,
-      headerConfig:{
-        
-      },
-      width:40,
-      excelConfig:{
-        include:true,
-        
-      }
-    }];
+const columns: AOGridColumnComponent[] = [{
+  dataField: 'email',
+  dataType: 'string',
+  caption: 'Email',
+  excelConfig: {
+    include: true,
+
+  }
+},
+{
+  dataField: 'address',
+  dataType: 'string',
+  caption: 'Direccion',
+  align: TextAlign.CENTER,
+},
+{
+  dataField: 'age',
+  dataType: 'currency',
+  caption: 'Edad',
+  align: TextAlign.RIGHT,
+  headerConfig: {
+
+  },
+  width: 40,
+  excelConfig: {
+    include: true,
+
+  }
+}];
 describe('AOGridComponent', () => {
   let component: AOGridComponent;
   let fixture: ComponentFixture<AOGridComponent>;
+  let dataService: DataService;
+  let totalItems=0;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientModule],
       declarations: [AOGridComponent],
-      providers: [{ provide: DataService, useValue: dataServiceMock },CurrencyPipe],
+      providers: [DataService, CurrencyPipe],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     });
 
     fixture = TestBed.createComponent(AOGridComponent);
     component = fixture.componentInstance;
-    component.dataService=dataServiceMock;
+    dataService = TestBed.inject(DataService);  // Inyecta el servicio real
+    component.dataService = dataService;
+    component.filterFields = ["name"];
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it('should initialize columns based on projectedColumns or dataSource', () => {
-    
-    component.dataSource=[{email:'email@email.com',address:'por ahi',age:28}];
-      
-
-    // Act
+  it('should initialize columns based on projectedColumns or dataSource', async () => {
     // Assuming initializeColumns gets called within ngAfterContentInit
-    component.ngAfterContentInit();
+    await component.ngAfterContentInit();
+    await fixture.whenStable(); //porque ngAfterContentInit es asyncrono
     // Assert
+    totalItems=component.currentItemsToShow.length;
+    console.log(totalItems);
     expect(component.columns.length).toBeGreaterThan(0);
-    console.log(component.columns)
-    // ... any other assertions related to what initializeColumns does
   });
-
 
   describe('applyFilter', () => {
     it('should reset displayedItems and update displayed items', () => {
@@ -94,11 +80,51 @@ describe('AOGridComponent', () => {
       expect(component.displayedItems).toBe(0);
       expect(component.updateDisplayedItems).toHaveBeenCalled();
     });
-
-    // ... más casos de prueba para applyFilter
   });
 
-  // ... otras descripciones y pruebas para diferentes métodos y propiedades
-
-  // ... más pruebas unitarias
+  describe('when the table activates scroll',()=>{
+    const eventMock = {
+      target: {
+        scrollTop: 100,  // o cualquier valor apropiado
+        offsetHeight: 500,  // o cualquier valor apropiado
+        scrollHeight: 600  // o cualquier valor apropiado
+      }
+    };
+    it('should handle onScroll', async () => {
+      spyOn(component, 'loadMoreData').and.callThrough();
+  
+      component.onScroll(eventMock);
+  
+      expect(component.isLoading).toBeTrue();
+      expect(component.isLoadingMoreData).toBeTrue();
+      expect(component.loadMoreData).toHaveBeenCalled();
+  
+    });
+    it('When scroll is activated it should bring more data', async () => {
+      const curentItemsToShow = component.currentItemsToShow.length;
+      spyOn(component, 'loadMoreData').and.callThrough();
+      component.onScroll(eventMock);
+      await fixture.whenStable();
+      console.log(curentItemsToShow,component.currentItemsToShow.length)
+      expect(component.currentItemsToShow.length).toBeGreaterThan(totalItems);
+  
+    });
+  });
+  describe('filter change', () => {
+    it('should handle filter change', async () => {
+      // Asegúrate de que 'columns' tenga algunos valores relevantes
+      const newFilters = { name: 'ol' };  // Suponiendo que key1 y key2 corresponden a los dataFields de las columnas
+      component.handleFilterChange(newFilters);
+      // Ahora verifica los resultados, por ejemplo:
+      expect(component.filters).toEqual(newFilters);
+    });
+    it('When changing filter it must bring data', async () => {
+      const newFilters = { name: 'ol' };  // Suponiendo que name corresponde a los dataFields de las columnas
+      component.handleFilterChange(newFilters);
+      //esperamos porque manda a llamar a unos metodos asincronos
+      await fixture.whenStable();
+      expect(component.currentItemsToShow.length).toBeGreaterThan(0);//verificamos que trajo datos el filtro
+    });
+  });
+ 
 });

@@ -40,7 +40,6 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       this.displayedItemsCount = this.itemsToLoad;
     }
     if (changes['dataSource']) {
-      console.log("entri")
       this.isLoading = true;
       this.updateDisplayedItems();
       setTimeout(() => {
@@ -50,7 +49,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     }
     if (changes['fixedColumns']) {
       this.fixedColumnsSetByInput = true;
-      console.log('fixedIput', this.fixedColumnsSetByInput);
+      // console.log('fixedIput', this.fixedColumnsSetByInput);
       //this.calculateColumnOffsets();
     }
     // if (changes['filters']) {
@@ -71,7 +70,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   }
   loadMoreItems(): void {
     this.displayedItemsCount += this.itemsToLoad;
-    console.log(this.displayedItemsCount)
+    // console.log(this.displayedItemsCount)
   }
   getDisplayedItems() {
     const filteredData = this.dataSource.filter(item => {
@@ -113,10 +112,10 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       this.skip = 1;//esto es porque se reinicia el filter
       const offset = this.skip;
       const take = this.itemsToLoad;
-      console.log('este es el offset', offset)
+      // console.log('este es el offset', offset)
       const filtersString = encodeURIComponent(JSON.stringify(this.filters));
       const response = await this.dataService?.fetchData(offset, take, filtersString).toPromise();
-      console.log(response)
+      // console.log(response)
       if (!response) {
         throw new Error('Network response was not ok');
       }
@@ -141,10 +140,10 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     try {
       const offset = this.skip;
       const take = this.itemsToLoad;
-      console.log('este es el offset', offset)
+      // console.log('este es el offset', offset)
       const filtersString = encodeURIComponent(JSON.stringify(this.filters));
       const response = await this.dataService?.fetchData(offset, take, filtersString).toPromise();
-      console.log(response)
+      // console.log(response)
       if (!response) {
         throw new Error('Network response was not ok');
       }
@@ -234,7 +233,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
 
     // Se concatenan las columnas en el orden correcto.
     this.columns = [...leftColumns, ...middleColumns, ...rightColumns];
-    console.log('columnas derecha', rightColumns)
+    // console.log('columnas derecha', rightColumns)
 
     //borde columna fijas
     if (leftColumns.length > 0) {
@@ -244,8 +243,8 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     if (rightColumns.length > 0) {
       this.lastRightFixedColumnDataField = rightColumns[0].dataField;
     }
-    console.log('colmna derecha', this.lastRightFixedColumnDataField)
-    console.log('colmna izquierda', this.firstLeftFixedColumnDataField)
+    // console.log('colmna derecha', this.lastRightFixedColumnDataField)
+    // console.log('colmna izquierda', this.firstLeftFixedColumnDataField)
     //fin
   }
   @Input() dataService?: IDataService;
@@ -270,7 +269,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
 
   }
   private initializeColumns() {
-    console.log(this.dataSource)
+    // console.log(this.dataSource)
     this.hasActions = !!this.aoGridActionsTemplate;
 
     // Si no se han pasado columnas a través del Input
@@ -301,7 +300,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
     if (this.fixedColumnsSetByInput) {  // Comprueba la bandera aquí.
       this.orderColumnsBasedOnFixed();
     }
-    console.log(this.fixedColumns);
+    // console.log(this.fixedColumns);
 
     //this.calculateColumnOffsets();
   }
@@ -327,13 +326,13 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   }
   updateDisplayedItems(): void {
     const filteredData = this.getFilteredData();
-    console.log(filteredData)
+    // console.log(filteredData)
     const start = this.displayedItems;
     const end = this.displayedItemsCount;
 
     this.currentItemsToShow = filteredData.slice(start, end);
     this.displayedItems = this.currentItemsToShow.length;
-    console.log(this.currentItemsToShow)
+    // console.log(this.currentItemsToShow)
   }
   onEdit(item: any) {
     this.edit.emit(item);
@@ -382,7 +381,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       }
     });
 
-    console.log(this.columnOffsets);
+    // console.log(this.columnOffsets);
   }
   getStickyStyle(column: AOGridColumnComponent): any {
     const fixedColumn = this.fixedColumns.find(fixedCol => fixedCol.dataField === column.dataField) || null;
@@ -515,7 +514,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
       const worksheet = workbook.addWorksheet('Sheet1');
       const filtersString = encodeURIComponent(JSON.stringify(this.filters));
       const response = await this.dataService?.fetchData(0, 0, filtersString).toPromise();
-      console.log(response)
+      // console.log(response)
       if (!response) {
         throw new Error('Network response was not ok');
       }
@@ -616,22 +615,22 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   filters$ = this._filtersSubject.asObservable();
 
   handleFilterChange(newFilters: { [key: string]: any }) {
-    console.log('se dio enter', newFilters);
+    // console.log('se dio enter', newFilters);
 
     // Itera sobre las claves en newFilters
     Object.keys(newFilters).forEach(key => {
       // Encuentra una columna en this.columns que coincida con la clave actual
       const matchingColumn = this.columns.find(column => column.dataField === key);
-      console.log(matchingColumn)
+      // console.log(matchingColumn)
       if (matchingColumn) {
-        console.log(matchingColumn.dataType)
+        // console.log(matchingColumn.dataType)
         switch (matchingColumn.dataType) {
           case 'currency':
           case 'number':
 
             // Verifica si el valor es realmente un número
             if (isNaN(Number(newFilters[key]))) {
-              console.log('no es numero')
+              // console.log('no es numero')
               // Si no es un número, elimina esa propiedad de newFilters
               delete newFilters[key];
             } else {
@@ -658,7 +657,7 @@ export class AOGridComponent implements AfterContentInit, OnChanges {
   }
 
   async cambiaFiltro(filtro: any) {
-    console.log('cambio filtro', filtro)
+    // console.log('cambio filtro', filtro)
     const hadFiltersBefore = Object.keys(this.previousFilters).length !== 0;
     const hasNoFiltersNow = Object.keys(this.filters).length === 0;
 
