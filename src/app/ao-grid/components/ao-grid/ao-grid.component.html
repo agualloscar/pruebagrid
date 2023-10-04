@@ -14,7 +14,7 @@
     <!-- El spinner -->
     <div *ngIf="isLoading && loadingType === 'spinner'"
         class="absolute inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-20 w-20"></div>
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-20 w-20 loading"></div>
     </div>
     <!--fin spinner-->
     <div class="relative overflow-x-auto custom-scrollbar shadow-md overflow-y-auto h-[600px] sm:rounded-lg"
@@ -56,7 +56,7 @@
                 <tr *ngIf="isLoading && loadingType === 'bar'">
                     <th colspan="100%" class="p-0 relative">
                         <div class="h-1 bg-gray-200 overflow-hidden">
-                            <div class="bg-blue-500 h-full w-3/4 animate-moveRight"></div>
+                            <div class="bg-blue-500 h-full w-3/4 animate-moveRight loading"></div>
                         </div>
                     </th>
                 </tr>
