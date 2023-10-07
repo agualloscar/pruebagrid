@@ -38,6 +38,10 @@ export class HomeComponent implements OnInit {
     };
   }
   ngOnInit(): void {
+    const date=new Date(0);
+    console.log(date.toDateString())
+    console.log(date.toUTCString())
+    console.log(date.toISOString())
     //this.articulos=this.generateData();
     this.myData = this.generateDataProducts(10000);
     this.myActionButtons= [
